@@ -5,9 +5,11 @@ import { globalStyles } from '../styles/styles';
 
 const AccountScreen = () => {
     return (
-        <View style={globalStyles.container}>
-            <HeaderComponent />
-            <Text>Account Screen</Text>
+        <View style={{flex:1}}>
+            <View style={globalStyles.container}>
+                <HeaderComponent title="Account" showBackButton={true}/>
+                <Text>Account Screen</Text>
+            </View>
         </View>
     );
 };

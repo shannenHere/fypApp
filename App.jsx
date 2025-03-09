@@ -3,6 +3,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { RightDrawerProvider, RightDrawerContext } from './contexts/RightDrawerContext';
+import HeaderComponent from './components/Header';
 
 import HomeScreen from './screens/HomeScreen';
 import SearchScreen from './screens/SearchScreen';
@@ -68,13 +69,55 @@ const LeftDrawerNavigator = () => {
                 headerShown: false, // Hide header if using custom UI
             }}
         >
-            <Drawer.Screen name="Home" component={HomeScreen} />
-            <Drawer.Screen name="Search" component={SearchScreen} />
-            <Drawer.Screen name="Settings" component={SettingsScreen} />
-            <Drawer.Screen name="Account" component={AccountScreen} />
-            <Drawer.Screen name="Login" component={LoginScreen} />
-            <Drawer.Screen name="CreateAccount" component={CreateAccountScreen} />
-            <Drawer.Screen name="Logout" component={LogoutScreen} />
+            <Drawer.Screen
+                name="Home"
+                component={HomeScreen}
+                options={({ navigation }) => ({
+                    header: () => <HeaderComponent title="Home" showBackButton={true} navigation={navigation} />,
+                })}
+            />
+            <Drawer.Screen
+                name="Search"
+                component={SearchScreen}
+                options={({ navigation }) => ({
+                    header: () => <HeaderComponent title="Search" showBackButton={true} navigation={navigation} />,
+                })}
+            />
+            <Drawer.Screen
+                name="Settings"
+                component={SettingsScreen}
+                options={({ navigation }) => ({
+                    header: () => <HeaderComponent title="Settings" showBackButton={true} navigation={navigation} />,
+                })}
+            />
+            <Drawer.Screen
+                name="Account"
+                component={AccountScreen}
+                options={({ navigation }) => ({
+                    header: () => <HeaderComponent title="Account" showBackButton={true} navigation={navigation} />,
+                })}
+            />
+            <Drawer.Screen
+                name="Login"
+                component={LoginScreen}
+                options={({ navigation }) => ({
+                    header: () => <HeaderComponent title="Login" showBackButton={true} navigation={navigation} />,
+                })}
+            />
+            <Drawer.Screen
+                name="CreateAccount"
+                component={CreateAccountScreen}
+                options={({ navigation }) => ({
+                    header: () => <HeaderComponent title="Create Account" showBackButton={true} navigation={navigation} />,
+                })}
+            />
+            <Drawer.Screen
+                name="Logout"
+                component={LogoutScreen}
+                options={({ navigation }) => ({
+                    header: () => <HeaderComponent title="Logout" showBackButton={true} navigation={navigation} />,
+                })}
+            />
         </Drawer.Navigator>
     );
 };
@@ -116,10 +159,13 @@ const RightDrawerNavigator = ({ navigation }) => {
                 screenOptions={{
                     drawerStyle: { width: 200 },
                     drawerPosition: 'right',
-                    headerShown: false,
                 }}
             >
-                <Drawer.Screen name="Main" component={LeftDrawerNavigator} />
+                <Drawer.Screen 
+                    name="Main" 
+                    component={LeftDrawerNavigator} 
+                    options={{ headerShown: false }} 
+                />
             </Drawer.Navigator>
         </RightDrawerProvider>
     );

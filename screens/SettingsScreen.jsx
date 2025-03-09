@@ -6,7 +6,7 @@ import { globalStyles } from '../styles/styles';
 const SettingsScreen = () => {
     return (
         <View style={globalStyles.container}>
-            <HeaderComponent />
+            <HeaderComponent title="Settings" showBackButton={true}/>
             <Text>Settings Screen</Text>
         </View>
     );

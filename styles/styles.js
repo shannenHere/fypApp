@@ -1,10 +1,58 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+const { width } = Dimensions.get("window"); // Get screen width
 
 export const globalStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   //Drawer Styles
+  headerContainer: {
+    width: "100%",
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    justifyContent: "center",
+    minHeight: 60, // Ensure enough height
+},
+topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between", // Keep elements on opposite sides
+    alignItems: "center",
+    width: "100%",
+    backgroundColor: "white",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+},
+bottomRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "transparent",
+    paddingHorizontal: 10,
+},
+iconButton: {
+    padding: 15, // Increased padding for better touch area
+    color: "black",
+},
+headerTitle: {
+    top: 20,
+    left: -10,
+    fontSize: 30,
+    marginLeft: 10,
+    color: "black",
+},
+iconStyle: {
+    fontSize: 30,
+    color: "black",
+},
+backIcon: {
+    top: -5,
+    left: 10,
+    fontSize: 28,
+    color: "black",
+},
+ // Back button: Hidden when on Home screen
+ hiddenButton: {
+  opacity: 0, // Invisible but still occupies space
+},
+invisible: {
+  opacity: 0, // Makes icon invisible
+},
   closeButton: {
     position: 'absolute',
     top: 40,
@@ -31,22 +79,5 @@ export const globalStyles = StyleSheet.create({
   },
   iconColor: {
     color: '#000',
-  },
-
-  // Header Styles
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
-    elevation: 4,
-  },
-  leftButton: {
-    padding: 10,
-  },
-  rightButton: {
-    padding: 10,
   },
 });

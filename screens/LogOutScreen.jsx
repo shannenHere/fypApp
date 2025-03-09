@@ -6,7 +6,7 @@ import { globalStyles } from '../styles/styles';
 const LogOutScreen = () => {
     return (
         <View style={globalStyles.container}>
-            <HeaderComponent />
+            <HeaderComponent title="Log Out" showBackButton={true}/>
             <Text>Log Out Screen</Text>
         </View>
     );

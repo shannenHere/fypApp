@@ -6,7 +6,7 @@ import { globalStyles } from '../styles/styles';
 const CreateAccountScreen = () => {
     return (
         <View style={globalStyles.container}>
-            <HeaderComponent />
+            <HeaderComponent title="Create Account" showBackButton={true}/>
             <Text>Create Account Screen</Text>
         </View>
     );

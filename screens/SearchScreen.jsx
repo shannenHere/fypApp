@@ -6,7 +6,7 @@ import { globalStyles } from '../styles/styles';
 const SearchScreen = () => {
     return (
         <View style={globalStyles.container}>
-            <HeaderComponent />
+            <HeaderComponent title="Search" showBackButton={true}/>
             <Text>Search Screen</Text>
         </View>
     );

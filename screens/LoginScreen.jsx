@@ -6,7 +6,7 @@ import { globalStyles } from '../styles/styles';
 const LoginScreen = () => {
     return (
         <View style={globalStyles.container}>
-            <HeaderComponent />
+            <HeaderComponent title="Log In" showBackButton={true}/>
             <Text>Log In Screen</Text>
         </View>
     );
