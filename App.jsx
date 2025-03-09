@@ -95,15 +95,12 @@ const CustomRightDrawerContent = () => {
             </TouchableOpacity>
             <View style={globalStyles.itemsContainer}>
                 <TouchableOpacity onPress={() => { navigation.navigate('Login'); closeRightDrawer(); }} style={globalStyles.item}>
-                    <Icon name="sign-in" size={30} style={[globalStyles.icon, globalStyles.iconColor]} />
                     <Text style={globalStyles.text}>Login</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { navigation.navigate('CreateAccount'); closeRightDrawer(); }} style={globalStyles.item}>
-                    <Icon name="user-plus" size={30} style={[globalStyles.icon, globalStyles.iconColor]} />
                     <Text style={globalStyles.text}>Create Account</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { navigation.navigate('Logout'); closeRightDrawer(); }} style={globalStyles.item}>
-                    <Icon name="sign-out" size={30} style={[globalStyles.icon, globalStyles.iconColor]} />
                     <Text style={globalStyles.text}>Logout</Text>
                 </TouchableOpacity>
             </View>

@@ -3,14 +3,14 @@ import { StyleSheet } from 'react-native';
 export const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
   },
+  //Drawer Styles
   closeButton: {
     position: 'absolute',
-    top: 40, // Adjusted to lower the button
+    top: 40,
   },
   itemsContainer: {
-    marginTop: 30, // Adjust this value to move the items lower
+    marginTop: 70,
   },
   item: {
     padding: 20,
@@ -23,12 +23,30 @@ export const globalStyles = StyleSheet.create({
   },
   text: {
     fontSize: 18,
+    color: '#000',
   },
   bottomContainer: {
     marginTop: 'auto',
     marginBottom: 30,
   },
   iconColor: {
-    color: '#000', // Define the icon color here
+    color: '#000',
+  },
+
+  // Header Styles
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    elevation: 4,
+  },
+  leftButton: {
+    padding: 10,
+  },
+  rightButton: {
+    padding: 10,
   },
 });

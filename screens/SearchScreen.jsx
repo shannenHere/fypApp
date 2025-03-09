@@ -1,10 +1,15 @@
-import React, {} from 'react';
+import React from 'react';
 import { View, Text} from 'react-native';
+import HeaderComponent from '../components/Header';
+import { globalStyles } from '../styles/styles';
 
-export default function SearchScreen({ navigation }) {
+const SearchScreen = () => {
     return (
-        <View>
+        <View style={globalStyles.container}>
+            <HeaderComponent />
             <Text>Search Screen</Text>
         </View>
     );
-}
+};
+
+export default SearchScreen;
