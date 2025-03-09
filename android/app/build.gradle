@@ -75,9 +75,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.june2024practicaltest"
+    namespace "com.privacyratingapp"
     defaultConfig {
-        applicationId "com.june2024practicaltest"
+        applicationId "com.privacyratingapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

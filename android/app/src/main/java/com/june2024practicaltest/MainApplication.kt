@@ -1,4 +1,4 @@
-package com.june2024practicaltest
+package com.privacyratingapp
 
 import android.app.Application
 import com.facebook.react.PackageList
