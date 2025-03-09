@@ -1,0 +1,13 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Anta-Regular.ttf",
+      "sha1": "e3e740580b8ba422bd33c18e18a00ac684a1553a"
+    },
+    {
+      "path": "src/assets/fonts/GreyQo-Regular.ttf",
+      "sha1": "3af4276e9841375c53b32dc83071b790932e6bd1"
+    }
+  ]
+}
