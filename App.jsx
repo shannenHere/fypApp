@@ -2,22 +2,22 @@ import React, { useContext } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { RightDrawerProvider, RightDrawerContext } from './contexts/RightDrawerContext';
-import HeaderComponent from './components/Header';
+import { RightDrawerProvider, RightDrawerContext } from './src/contexts/RightDrawerContext';
+import HeaderComponent from './src/components/Header';
 
-import HomeScreen from './screens/HomeScreen';
-import SearchScreen from './screens/SearchScreen';
-import SettingsScreen from './screens/SettingsScreen';
-import AccountScreen from './screens/AccountScreen';
-import LoginScreen from './screens/LoginScreen';
-import CreateAccountScreen from './screens/CreateAccountScreen';
-import LogoutScreen from './screens/LogOutScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import SearchScreen from './src/screens/SearchScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+import AccountScreen from './src/screens/AccountScreen';
+import LoginScreen from './src/screens/LoginScreen';
+import CreateAccountScreen from './src/screens/CreateAccountScreen';
+import LogoutScreen from './src/screens/LogOutScreen';
 
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { DrawerActions } from '@react-navigation/native';
-import { globalStyles } from './styles/styles';
+import { globalStyles } from './src/styles/styles';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
