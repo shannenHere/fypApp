@@ -15,9 +15,9 @@ topRow: {
     justifyContent: "space-between", // Keep elements on opposite sides
     alignItems: "center",
     width: "100%",
-    backgroundColor: "white",
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    backgroundColor: "#d7d7d7",
+    paddingHorizontal: 5,
+    paddingVertical: 3,
 },
 bottomRow: {
     flexDirection: "row",
@@ -31,7 +31,7 @@ iconButton: {
 },
 headerTitle: {
     top: 20,
-    left: -10,
+    left: -20,
     fontSize: 30,
     marginLeft: 10,
     color: "black",
@@ -42,7 +42,7 @@ iconStyle: {
 },
 backIcon: {
     top: -5,
-    left: 10,
+    left: 0,
     fontSize: 28,
     color: "black",
 },
