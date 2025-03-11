@@ -1,31 +1,40 @@
-import React, {useState} from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, FlatList} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
 import HeaderComponent from '../components/Header';
 import { globalStyles } from '../styles/styles';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import axios from 'axios';
+
+const API_URL = 'http://10.0.2.2:5000';
 
 const HomeScreen = () => {
-    const [text, setText] = useState('');
+    const [searchText, setSearchText] = useState('');
+    const [policyData, setPolicyData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const installedApps = [
-        { id: '1', name: 'App #1' },
-        { id: '2', name: 'App #2' },
-        { id: '3', name: 'App #3' },
-        { id: '4', name: 'App #4' },
-        { id: '5', name: 'App #5' },
-        { id: '6', name: 'App #6' },
-        { id: '7', name: 'App #7' },
-        { id: '8', name: 'App #8' },
-        { id: '9', name: 'App #9' },
-        { id: '10', name: 'App #10' },
-        { id: '11', name: 'App #11' },
-        { id: '12', name: 'App #12' },
-        { id: '13', name: 'App #13' },
-        { id: '14', name: 'App #14' },
-        { id: '15', name: 'App #15' },
-        { id: '16', name: 'App #16' },
-        { id: '17', name: 'App #17' },
-    ];
+    // Fetch the policy data (all app details) from the database via API
+    useEffect(() => {
+        fetchPolicyData();
+    }, []);
+
+    const fetchPolicyData = async () => {
+        try {
+          const response = await axios.get(`${API_URL}/apps`);
+          console.log('Fetched policy data:', response.data); // Verify keys here
+          setPolicyData(response.data);
+        } catch (error) {
+          console.error('Error fetching policy data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };      
+
+    const handleAppClick = (app) => {
+        Alert.alert(
+          'Privacy Alert',
+          `App: ${app.app_name}\nRating: ${app.rating}\nWorst Permission: ${app.worst_permissions}\nConcern: ${app.privacy_concern}`
+        );
+      };
 
     return (
         <View style={globalStyles.container}>
@@ -34,12 +43,13 @@ const HomeScreen = () => {
                 <View style={styles.homeSearch}>
                     <TextInput
                         style={styles.textInput}
-                        placeholder="Enter text here..."
-                        value={text}
-                        onChangeText={setText}
+                        placeholder="Search for An App..."
+                        value={searchText}
+                        onChangeText={setSearchText}
                     />
                     <Icon name="search" style={styles.iconStyle}/>
                 </View>
+
                 <View style={styles.installedApps}>
                     <Text style={styles.installedAppsTitle}>Installed Apps</Text>
                     <View style={styles.installAppsRow}>
@@ -58,25 +68,41 @@ const HomeScreen = () => {
                             </TouchableOpacity>
                         </View>
                     </View>
+
                     <View style={styles.installedAppsSearch}>
                             <TextInput
                                 style={styles.textInput}
                                 placeholder="Search within Installed Apps..."
-                                value={text}
-                                onChangeText={setText}
+                                value={searchText}
+                                onChangeText={setSearchText}
                             />
                             <Icon name="search" style={styles.iconStyle}/>
                     </View>
+
+
                     <ScrollView 
                         showsVerticalScrollIndicator={true} 
                         style={styles.scrollView}
                     >
                         <View style={styles.gridContainer}>
-                            {installedApps.map((app) => (
-                                <View key={app.id} style={styles.appContainer}>
-                                    <View style={styles.appIcon} />
-                                    <Text style={styles.appName}>{app.name}</Text>
-                                </View>
+                        {policyData
+                            .filter(app => (app.app_name || "").toLowerCase().includes(searchText.toLowerCase()))
+                            .map((app) => (
+                                <TouchableOpacity
+                                key={app.app_id}
+                                style={styles.appContainer}
+                                onPress={() => handleAppClick(app)}
+                                >
+                                {app.icon_url ? (
+                                    <Image source={{ uri: app.icon_url }} style={styles.appIcon} />
+                                ) : (
+                                    <View style={[styles.appIcon, styles.missingIcon]}>
+                                    <Text style={styles.missingIconText}>App no longer on Google Play Store</Text>
+                                    </View>
+                                )}
+                                <Text style={styles.appName}>{app.app_name}</Text>
+                                <Text style={styles.appRating}>{app.rating}</Text>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     </ScrollView>
@@ -191,9 +217,33 @@ const styles = StyleSheet.create({
     },
     appName: {
         marginTop: 5,
-        fontSize: 12,
+        fontSize: 10,
         textAlign: 'center',
     },
+    appRating: {
+        fontSize: 10,
+        color: 'red',
+    },
+    appPrivacyConcern: {
+        fontSize: 10,
+        color: 'orange',
+        fontStyle: 'italic',
+    },
+    appWorstPermission: {
+        fontSize: 10,
+        color: 'purple',
+    },
+    missingIcon: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ccc',
+      },
+      missingIconText: {
+        fontSize: 8,
+        textAlign: 'center',
+        color: 'black',
+        paddingHorizontal: 2,
+      },
 });
 
 export default HomeScreen;
