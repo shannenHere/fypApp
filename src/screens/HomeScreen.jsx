@@ -4,6 +4,7 @@ import HeaderComponent from '../components/Header';
 import { globalStyles } from '../styles/styles';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
+import * as CheckAppInstalled from '../custom-files/CheckAppInstalled';
 
 const API_URL = 'http://10.0.2.2:5000';
 
