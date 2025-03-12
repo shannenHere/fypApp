@@ -74,6 +74,7 @@ invisible: {
     color: '#000',
   },
   bottomContainer: {
+    top: 420,
     marginTop: 'auto',
     marginBottom: 30,
   },
