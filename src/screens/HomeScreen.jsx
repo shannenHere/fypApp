@@ -4,30 +4,18 @@ import HeaderComponent from '../components/Header';
 import { globalStyles } from '../styles/styles';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
+import InstalledAppsList from '../components/InstalledAppsList';
 
 const API_URL = 'http://10.0.2.2:5000';
 
 const HomeScreen = () => {
     const [searchText, setSearchText] = useState('');
-    const [policyData, setPolicyData] = useState([]);
+    const [installedSearchText, setInstalledSearchText] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
     const [loading, setLoading] = useState(true);
 
-    // Fetch the policy data (all app details) from the database via API
     useEffect(() => {
-        fetchPolicyData();
-    }, []);
-
-    const fetchPolicyData = async () => {
-        try {
-          const response = await axios.get(`${API_URL}/apps`);
-          console.log('Fetched policy data:', response.data); // Verify keys here
-          setPolicyData(response.data);
-        } catch (error) {
-          console.error('Error fetching policy data:', error);
-        } finally {
-          setLoading(false);
-        }
-      };      
+    }, []);     
 
     const handleAppClick = (app) => {
         Alert.alert(
@@ -35,6 +23,15 @@ const HomeScreen = () => {
           `App: ${app.app_name}\nRating: ${app.rating}\nWorst Permission: ${app.worst_permissions}\nConcern: ${app.privacy_concern}`
         );
       };
+
+      const handleCategoryPress = (category) => {
+        // If the same category is clicked again, deselect it (set to default)
+        if (selectedCategory === category) {
+            setSelectedCategory('All'); // Deselect when the same button is clicked
+        } else {
+            setSelectedCategory(category); // Set the new selected category
+        }
+    };
 
     return (
         <View style={globalStyles.container}>
@@ -52,20 +49,51 @@ const HomeScreen = () => {
 
                 <View style={styles.installedApps}>
                     <Text style={styles.installedAppsTitle}>Installed Apps</Text>
+
                     <View style={styles.installAppsRow}>
-                        <TouchableOpacity style={styles.selectedinstalledAppsButtons}>
-                            <Text style={styles.selectedinstalledAppsButtonsText}>All</Text>
-                        </TouchableOpacity>
-                        <View style={styles.installedAppsCategory}>
-                            <TouchableOpacity style={styles.installedAppsButtons}>
-                                <Text style={styles.installedAppsButtonsText}>Good</Text>
+                        {/* Left Column: "All" button */}
+                        <View style={styles.leftColumn}>
+                            <TouchableOpacity
+                            style={[
+                                styles.categoryButton,
+                                selectedCategory === 'All' && styles.categoryButtonSelected
+                            ]}
+                            onPress={() => handleCategoryPress('All')}
+                            >
+                                <Text
+                                    style={[
+                                    styles.selectedinstalledAppsButtonsText,
+                                    selectedCategory === 'All' ? styles.textSelected : styles.textUnselected
+                                    ]}
+                                >
+                                    All
+                                </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.installedAppsButtons}>
-                                <Text style={styles.installedAppsButtonsText}>Okay</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.installedAppsButtons}>
-                                <Text style={styles.installedAppsButtonsText}>Bad</Text>
-                            </TouchableOpacity>
+                        </View>
+
+                        {/* Right Column: "Good", "Okay", and "Bad" buttons */}
+                        <View style={styles.rightColumn}>
+                            <View style={styles.installedAppsCategory}>
+                            {['Good', 'Okay', 'Bad'].map((category) => (
+                                <TouchableOpacity
+                                key={category}
+                                style={[
+                                    styles.installedAppsButtons,
+                                    selectedCategory === category && styles.categoryButtonSelected
+                                ]}
+                                onPress={() => handleCategoryPress(category)}
+                                >
+                                <Text
+                                    style={[
+                                    styles.installedAppsButtonsText,
+                                    selectedCategory === category ? styles.textSelected : styles.textUnselected
+                                    ]}
+                                >
+                                    {category}
+                                </Text>
+                                </TouchableOpacity>
+                            ))}
+                            </View>
                         </View>
                     </View>
 
@@ -73,39 +101,16 @@ const HomeScreen = () => {
                             <TextInput
                                 style={styles.textInput}
                                 placeholder="Search within Installed Apps..."
-                                value={searchText}
-                                onChangeText={setSearchText}
+                                value={installedSearchText}
+                                onChangeText={setInstalledSearchText}
                             />
                             <Icon name="search" style={styles.iconStyle}/>
                     </View>
 
 
-                    <ScrollView 
-                        showsVerticalScrollIndicator={true} 
-                        style={styles.scrollView}
-                    >
-                        <View style={styles.gridContainer}>
-                        {policyData
-                            .filter(app => (app.app_name || "").toLowerCase().includes(searchText.toLowerCase()))
-                            .map((app) => (
-                                <TouchableOpacity
-                                key={app.app_id}
-                                style={styles.appContainer}
-                                onPress={() => handleAppClick(app)}
-                                >
-                                {app.icon_url ? (
-                                    <Image source={{ uri: app.icon_url }} style={styles.appIcon} />
-                                ) : (
-                                    <View style={[styles.appIcon, styles.missingIcon]}>
-                                    <Text style={styles.missingIconText}>App no longer on Google Play Store</Text>
-                                    </View>
-                                )}
-                                <Text style={styles.appName}>{app.app_name}</Text>
-                                <Text style={styles.appRating}>{app.rating}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </ScrollView>
+                    <View style={styles.installedAppsGrid}>
+                        <InstalledAppsList filterText={installedSearchText} category={selectedCategory}/>
+                    </View>
                 </View>
             </View>
         </View>
@@ -134,116 +139,81 @@ const styles = StyleSheet.create({
         fontSize: 25,
         color: 'black',
     },
+    installedAppsTitle: {
+        fontSize: 33,
+        color: 'black',
+        fontWeight: 'bold',
+    },
     installedApps: {
         top: 30,
         left: 10,
     },
     installAppsRow: {
         flexDirection: 'row',
-        justifyContent: "space-between",
-    },
-    installedAppsTitle: {
-        fontSize: 25,
-        color: 'black',
-        fontWeight: 'bold',
-    },
-    selectedinstalledAppsButtons: {
-        top: 10,
-        width: 45,
-        height: 25,
-        backgroundColor: '#169bd5',
-        borderRadius: 5,
-        borderColor: 'black',
-        borderWidth: 0.5,
-    },
-    installedAppsButtons: {
-        top: 10,
-        width: 60,
-        height: 25,
-        borderRadius: 5,
-        borderColor: 'black',
-        borderWidth: 0.5,
-        marginHorizontal: 1, 
-    },
-    selectedinstalledAppsButtonsText: {
-        padding: 3,
-        color: 'white',
-        textAlign: 'center',
-        fontSize: 13,
-    },
-    installedAppsButtonsText: {
-        padding: 3,
-        color: 'black',
-        textAlign: 'center',
-        fontSize: 13,
-    },
-    installedAppsCategory: {
-        flexDirection: 'row',
-        right: 100,
-    },
-    installedAppsSearch: {
-        top: 4,
-        flexDirection: 'row',
-        left: -10,
-    },
-    scrollView: {
-        flexGrow: 1, // Ensures it expands properly
-        top: 20,
-        paddingVertical: 10,
-        paddingLeft: 10,
-        height: 340, 
-        width: 290,
-        borderWidth: 1,
-        borderColor: '#cccbca',
-    },
-    gridContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap', 
-        alignItems: 'flex-start',
-    },
-    appContainer: {
-        width: '22%', // Adjusted for 4 items per row
-        alignItems: 'center',
-        paddingBottom: 15,
-        paddingHorizontal: 5,
-        marginRight: 5,
-    },
-    appIcon: {
-        width: 55,  // Increased size
-        height: 55, 
-        backgroundColor: '#ddd',
-        borderWidth: 1,
-        borderColor: 'black',
-    },
-    appName: {
-        marginTop: 5,
-        fontSize: 10,
-        textAlign: 'center',
-    },
-    appRating: {
-        fontSize: 10,
-        color: 'red',
-    },
-    appPrivacyConcern: {
-        fontSize: 10,
-        color: 'orange',
-        fontStyle: 'italic',
-    },
-    appWorstPermission: {
-        fontSize: 10,
-        color: 'purple',
-    },
-    missingIcon: {
+        justifyContent: 'space-between',
+        marginVertical: 10,
+      },
+      leftColumn: {
+        flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#ccc',
       },
-      missingIconText: {
-        fontSize: 8,
+      rightColumn: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+        right: 95,
+      },
+      categoryButton: {
+        width: 40,
+        height: 30,
+        paddingVertical: 5,
+        paddingHorizontal: 12,
+        borderRadius: 3,
+        borderColor: 'black',
+        borderWidth: 0.5,
+      },
+      categoryButtonSelected: {
+        backgroundColor: '#007AFF',
+      },
+      selectedinstalledAppsButtonsText: {
+        fontSize: 13,
+        textAlign: 'center',
+        color: 'white',
+      },
+      installedAppsButtonsText: {
+        fontSize: 13,
         textAlign: 'center',
         color: 'black',
-        paddingHorizontal: 2,
       },
+      installedAppsCategory: {
+        flexDirection: 'row',
+      },
+      installedAppsButtons: {
+        paddingVertical: 5,
+        paddingHorizontal: 12,
+        borderRadius: 5,
+        backgroundColor: '#eee',
+        borderColor: 'black',
+        borderWidth: 0.5,
+        marginHorizontal: 5,
+        height: 30,
+        width: 60,
+      },
+      textSelected: {
+        color: 'white',
+      },
+      textUnselected: {
+        color: 'black',
+      },
+      installedAppsSearch: {
+        flexDirection: 'row',
+        right: 10,
+        top: -15,
+      },
+      installedAppsGrid: {
+        top: -20,
+        flex: 1,
+      }
 });
 
 export default HomeScreen;
