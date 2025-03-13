@@ -81,4 +81,41 @@ invisible: {
   iconColor: {
     color: '#000',
   },
+  input: { 
+    borderWidth: 1, 
+    borderRadius: 1, 
+    marginBottom: 20,
+    height: 25,
+  },
+    InputButton: { 
+      backgroundColor: "#007bff", 
+      padding: 10, 
+      borderRadius: 5, 
+      alignItems: "center", 
+      marginTop: 10,
+      width: 125,
+      height: 40,
+    },
+    InputButtonText: { 
+      color: "white", 
+      fontWeight: "bold" 
+    },
+    InputLinkText: { 
+      color: "#007bff", 
+      textAlign: "center", 
+      marginTop: 10,
+      top: 10,
+    },
+    InputContainer: {
+      paddingVertical: 60,
+      paddingHorizontal: 50,
+    },
+    InputLabel: {
+      color : 'black',
+      left: 2,
+    },
+    InputButtonContainer: {
+      flexDirection: 'row',
+      justifyContent: "space-between",
+    },
 });

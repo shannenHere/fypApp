@@ -248,7 +248,7 @@ missingIcon: {
     paddingHorizontal: 20,
     borderRadius: 8,
     marginTop: 10,
-    width: 200,
+    width: 250,
   },
   searchButtonText: {
     color: '#fff',
