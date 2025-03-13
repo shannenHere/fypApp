@@ -3,6 +3,7 @@ import { View, Text, ActivityIndicator, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../contexts/AuthContext";
 import { globalStyles } from "../styles/styles";
+import HeaderComponent from '../components/Header';
 
 const LogOutScreen = () => {
     const { logOut } = useAuth();
@@ -33,7 +34,7 @@ const LogOutScreen = () => {
 
     return (
         <View style={globalStyles.container}>
-            <Text style={{ fontSize: 18, marginBottom: 10 }}>Logging out...</Text>
+            <HeaderComponent title="Logging Out..." showBackButton={false}/>
             {isLoggingOut && <ActivityIndicator size="large" color="#0000ff" />}
         </View>
     );

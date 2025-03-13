@@ -18,8 +18,8 @@ const { user, logIn } = useAuth();
   useEffect(() => {
     if (user) {
       Alert.alert(
-        "Already Logged In",
-        "You are already logged in. Redirecting to Home...",
+        "Logged In",
+        "You are logged in. Redirecting to Home...",
         [
           {
             text: "OK",

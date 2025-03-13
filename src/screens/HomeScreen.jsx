@@ -3,16 +3,18 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert,
 import HeaderComponent from '../components/Header';
 import { globalStyles } from '../styles/styles';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import axios from 'axios';
 import InstalledAppsList from '../components/InstalledAppsList';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigation } from '@react-navigation/native'; 
 
 const API_URL = 'http://10.0.2.2:5000';
 
 const HomeScreen = () => {
+    const { user } = useAuth();
     const [searchText, setSearchText] = useState('');
     const [installedSearchText, setInstalledSearchText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
-    const [loading, setLoading] = useState(true);
+    const navigation = useNavigation();
 
     useEffect(() => {
     }, []);     
@@ -107,10 +109,20 @@ const HomeScreen = () => {
                             <Icon name="search" style={styles.iconStyle}/>
                     </View>
 
-
-                    <View style={styles.installedAppsGrid}>
-                        <InstalledAppsList filterText={installedSearchText} category={selectedCategory}/>
-                    </View>
+                    {/* Installed Apps Section - Only Visible If User is Logged In */}
+                    {user ? (
+                        <View style={styles.installedAppsGrid}>
+                            <InstalledAppsList filterText={installedSearchText} category={selectedCategory}/>
+                        </View>
+                    ) : (
+                         // Show message if user is not logged in
+                        <View style={styles.loginPrompt}>
+                            <Text style={styles.loginPromptText}>Log in to view installed apps.</Text>
+                            <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
+                                <Text style={styles.loginButtonText}>Log In</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
             </View>
         </View>
@@ -213,7 +225,30 @@ const styles = StyleSheet.create({
       installedAppsGrid: {
         top: -20,
         flex: 1,
-      }
+      },
+    loginPrompt: { 
+        alignItems: 'center', 
+        marginTop: 5,
+        borderWidth: 0.5, 
+        width: 290,
+        height: 300,
+        paddingTop: 30,
+    },
+    loginPromptText: { 
+        fontSize: 16, 
+        color: 'black' 
+    },
+    loginButton: { 
+        backgroundColor: '#007AFF', 
+        paddingVertical: 8, 
+        paddingHorizontal: 20, 
+        borderRadius: 5, 
+        marginTop: 10 
+    },
+    loginButtonText: { 
+        color: 'white', 
+        fontWeight: 'bold' 
+    },
 });
 
 export default HomeScreen;
