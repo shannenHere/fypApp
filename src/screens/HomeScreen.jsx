@@ -117,10 +117,13 @@ const HomeScreen = () => {
                     ) : (
                          // Show message if user is not logged in
                         <View style={styles.loginPrompt}>
-                            <Text style={styles.loginPromptText}>Log in to view installed apps.</Text>
-                            <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
-                                <Text style={styles.loginButtonText}>Log In</Text>
-                            </TouchableOpacity>
+                            <Text style={styles.loginPromptText}>Log in to see ratings for installed apps and manage permissions easily.</Text>
+                            <View style={styles.loginButtonContainer}>
+                                <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
+                                    <Text style={styles.loginButtonText}>Log In</Text>
+                                    <Icon name="angle-right" size={20} style={styles.loginIcon}/>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     )}
                 </View>
@@ -149,10 +152,11 @@ const styles = StyleSheet.create({
     iconStyle: {
         top: 20,
         fontSize: 25,
-        color: 'black',
+        color: 'grey',
+        fontWeight: "100",
     },
     installedAppsTitle: {
-        fontSize: 33,
+        fontSize: 30,
         color: 'black',
         fontWeight: 'bold',
     },
@@ -174,6 +178,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'flex-end',
         right: 95,
+        paddingHorizontal: 0,
       },
       categoryButton: {
         width: 40,
@@ -182,6 +187,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         borderRadius: 3,
         borderColor: 'black',
+        backgroundColor: '#d7d7d7',
         borderWidth: 0.5,
       },
       categoryButtonSelected: {
@@ -205,11 +211,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         borderRadius: 5,
         backgroundColor: '#eee',
+        marginHorizontal: 1,
+        height: 30,
+        width: 70,
+        backgroundColor: '#d7d7d7',
         borderColor: 'black',
         borderWidth: 0.5,
-        marginHorizontal: 5,
-        height: 30,
-        width: 60,
       },
       textSelected: {
         color: 'white',
@@ -228,27 +235,48 @@ const styles = StyleSheet.create({
       },
     loginPrompt: { 
         alignItems: 'center', 
-        marginTop: 5,
-        borderWidth: 0.5, 
         width: 290,
         height: 300,
-        paddingTop: 30,
+        paddingTop: 85,
+        borderSize: 0.5,
+        borderWidth: 1,
+        borderColor: '#cccbca',
+        paddingHorizontal: 20,
     },
     loginPromptText: { 
         fontSize: 16, 
-        color: 'black' 
+        fontStyle: "italic",
+        color: 'grey',
+    },
+    loginButtonContainer: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        paddingHorizontal: 15,
     },
     loginButton: { 
         backgroundColor: '#007AFF', 
-        paddingVertical: 8, 
         paddingHorizontal: 20, 
-        borderRadius: 5, 
-        marginTop: 10 
+        paddingVertical: 4,
+        borderRadius: 3, 
+        marginTop: 10 ,
+        width: 160,
+        flexDirection: 'row',
+        justifyContent: "space-between",
+        alignContent: "right",
+        height: 30,
+        borderWidth: 0.5,
+        
     },
     loginButtonText: { 
-        color: 'white', 
-        fontWeight: 'bold' 
+        fontSize: 15,
+        color: 'white',
     },
+    loginIcon: {
+        left: 5,
+        color: "white",
+        bottom: 1,
+    }
 });
 
 export default HomeScreen;

@@ -35,6 +35,7 @@ headerTitle: {
     fontSize: 30,
     marginLeft: 10,
     color: "black",
+    fontWeight: "bold",
 },
 iconStyle: {
     fontSize: 30,
