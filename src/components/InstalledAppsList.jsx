@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { InstalledApps } from 'react-native-launcher-kit';
+import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../styles/styles';
 
 const API_URL = "http://10.0.2.2:5000";
@@ -34,7 +35,7 @@ const normalizeTikTok = (app) => {
 
 const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
   const [installedAppsinDB, setInstalledAppsinDB] = useState([]);
-
+  const navigation = useNavigation();
   // Fetch installed apps from device
   const fetchInstalledApps = async () => {
     try {
@@ -241,17 +242,20 @@ missingIcon: {
     fontSize: 14,
     color: 'gray',
     fontStyle: 'italic',
+    marginHorizontal: 20,
+    textAlign: 'center',
   },
   searchButton: {
     backgroundColor: '#d7d7d7',
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 5,
     borderRadius: 8,
     marginTop: 10,
     width: 250,
+    marginHorizontal: 30,
   },
   searchButtonText: {
-    color: '#fff',
+    color: 'gray',
     fontSize: 13,
     fontWeight: 'bold',
   },

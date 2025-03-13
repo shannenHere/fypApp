@@ -85,7 +85,10 @@ invisible: {
     borderWidth: 1, 
     borderRadius: 1, 
     marginBottom: 20,
-    height: 25,
+    height: 30,
+    fontSize: 15,
+    paddingVertical: 0,
+    color: 'black',
   },
     InputButton: { 
       backgroundColor: "#007bff", 

@@ -3,6 +3,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { RightDrawerProvider, RightDrawerContext } from './src/contexts/RightDrawerContext';
+import { AuthProvider } from "./src/contexts/AuthContext";
 import HeaderComponent from './src/components/Header';
 
 import HomeScreen from './src/screens/HomeScreen';
@@ -173,13 +174,15 @@ const RightDrawerNavigator = ({ navigation }) => {
 
 const App = () => {
     return (
-        <RightDrawerProvider>
-            <NavigationContainer>
-                <Stack.Navigator screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="RightDrawer" component={RightDrawerNavigator} />
-                </Stack.Navigator>
-            </NavigationContainer>
-        </RightDrawerProvider>
+        <AuthProvider>
+            <RightDrawerProvider>
+                <NavigationContainer>
+                    <Stack.Navigator screenOptions={{ headerShown: false }}>
+                        <Stack.Screen name="RightDrawer" component={RightDrawerNavigator} />
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </RightDrawerProvider>
+        </AuthProvider>
     );
 };
 

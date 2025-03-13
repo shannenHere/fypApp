@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
+import bcrypt
 
 app = Flask(__name__)
 CORS(app)
@@ -54,6 +55,42 @@ def get_app_details(app_id):
         return jsonify(result)
     else:
         return jsonify({'error': 'App not found'}), 404
+    
+# User Registration
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+    is_admin = data.get('is_admin', 0)  # Default to regular user
+
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+    try:
+        conn = get_db_connection()
+        conn.execute('INSERT INTO users (email, password, is_admin) VALUES (?, ?, ?)', 
+                     (email, hashed_password, is_admin))
+        conn.commit()
+        conn.close()
+        return jsonify({'message': 'User registered successfully'}), 201
+    except sqlite3.IntegrityError:
+        return jsonify({'error': 'Email already exists'}), 400
+    
+# User Login
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    conn.close()
+
+    if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
+        return jsonify({'message': 'Login successful', 'is_admin': user['is_admin']})
+    else:
+        return jsonify({'error': 'Invalid email or password'}), 401
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
