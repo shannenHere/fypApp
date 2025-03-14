@@ -85,6 +85,7 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
       if (matchingDb) {
         acc.push({
           ...app,
+          app_id: matchingDb.app_id,
           app_name: matchingDb.app_name,
           icon_url: matchingDb.icon_url,
           rating: matchingDb.rating,

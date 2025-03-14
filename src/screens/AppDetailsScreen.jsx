@@ -25,7 +25,12 @@ const AppDetailsScreen = () => {
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackList, setFeedbackList] = useState([]); // Example if you store feedback
 
-  useEffect(() => {
+  useEffect(() => { 
+    console.log("Navigated with appId:", appId); 
+    if (!appId) {
+      console.error("Error: No appId found in route params");
+      return;
+    }
     // 1. Fetch app details from your API
     const fetchDetails = async () => {
       try {

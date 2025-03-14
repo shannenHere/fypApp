@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
 import HeaderComponent from '../components/Header';
 import { globalStyles } from '../styles/styles';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import InstalledAppsList from '../components/InstalledAppsList';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigation } from '@react-navigation/native'; 
+import { useNavigation, useFocusEffect } from '@react-navigation/native'; 
 
 const API_URL = 'http://10.0.2.2:5000';
 
@@ -15,6 +15,15 @@ const HomeScreen = () => {
     const [installedSearchText, setInstalledSearchText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const navigation = useNavigation();
+
+    useFocusEffect(
+        useCallback(() => {
+          // Cleanup function: clear fields when screen loses focus.
+          return () => {
+            setSearchText("");
+          };
+        }, [])
+    );
 
     useEffect(() => {
     }, []);     
@@ -45,7 +54,7 @@ const HomeScreen = () => {
                         value={searchText}
                         onChangeText={setSearchText}
                     />
-                    
+
                     {searchText.length > 0 && (
                         <TouchableOpacity onPress={() => setSearchText("")} style={styles.searchIcon}>
                             <Icon name="times" style={styles.clearIcon} />
