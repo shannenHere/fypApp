@@ -21,7 +21,6 @@ const { user, logIn, forgotPassword } = useAuth();
   const [forgotError, setForgotError] = useState("");
   const [forgotTouched, setForgotTouched] = useState(false);
   
-  // useFocusEffect to run when screen gains and loses focus.
   useFocusEffect(
     useCallback(() => {
       // When screen gains focus, if user is logged in, alert them.

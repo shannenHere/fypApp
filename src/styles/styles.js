@@ -126,4 +126,7 @@ invisible: {
       fontSize: 11,
       marginBottom: 10,
     },
+    screenContainer: {
+      left: 45,
+  },
 });

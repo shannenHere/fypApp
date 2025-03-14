@@ -38,7 +38,7 @@ const HomeScreen = () => {
     return (
         <View style={globalStyles.container}>
             <HeaderComponent title="Privacy Rating App" showBackButton={false}/>
-            <View style={styles.screenContainer}>
+            <View style={globalStyles.screenContainer}>
                 <View style={styles.homeSearch}>
                     <TextInput
                         style={styles.textInput}
@@ -46,7 +46,7 @@ const HomeScreen = () => {
                         value={searchText}
                         onChangeText={setSearchText}
                     />
-                    <Icon name="search" style={styles.iconStyle}/>
+                    <Icon name="search" style={styles.searchIcon}/>
                 </View>
 
                 <View style={styles.installedApps}>
@@ -106,7 +106,7 @@ const HomeScreen = () => {
                                 value={installedSearchText}
                                 onChangeText={setInstalledSearchText}
                             />
-                            <Icon name="search" style={styles.iconStyle}/>
+                            <Icon name="search" style={styles.searchIcon}/>
                     </View>
 
                     {/* Installed Apps Section - Only Visible If User is Logged In */}
@@ -133,27 +133,25 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        left: 45,
-    },
     homeSearch: {
-        flexDirection: 'row',
+        flexDirection: "row",
+        alignItems: "center",
+        marginHorizontal: 10,
+        marginTop: 15,
+        borderWidth: 1,
+        borderColor: "#ccc",
+        marginRight: 90,
+        height: 30,
     },
     textInput: {
-        top: 10,
-        padding: 5,
-        width: 255,
-        left: -3,
-        height: 25,
-        margin: 12,
-        borderWidth: 1,
-        borderColor:'#cccbca',
+        flex: 1,
+        paddingHorizontal: 10,
+        height: 40,
     },
-    iconStyle: {
-        top: 20,
-        fontSize: 25,
-        color: 'grey',
-        fontWeight: "100",
+    searchIcon: {
+        fontSize: 20,
+        color: "#333",
+        marginRight: 10,
     },
     installedAppsTitle: {
         fontSize: 30,
@@ -225,9 +223,13 @@ const styles = StyleSheet.create({
         color: 'black',
       },
       installedAppsSearch: {
-        flexDirection: 'row',
-        right: 10,
-        top: -15,
+        flexDirection: "row",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#ccc",
+        marginRight: 100,
+        marginBottom: 10,
+        height: 30,
       },
       installedAppsGrid: {
         top: -20,

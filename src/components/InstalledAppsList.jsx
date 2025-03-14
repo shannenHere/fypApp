@@ -16,7 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../styles/styles';
 
 const API_URL = "http://10.0.2.2:5000";
-const currentAppPackage = "com.privacyratingapp"; // Exclude your own app
+const currentAppPackage = "com.privacyratingapp"; // Exclude current app
 
 // Helper to normalize TikTok entries
 const normalizeTikTok = (app) => {
@@ -167,7 +167,7 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
                 ) : (
                   <View style={[styles.appIcon, styles.missingIcon]}>
                     <Text style={styles.missingIconText}>
-                      App no longer on Google Play Store
+                      No Icon
                     </Text>
                   </View>
                 )}
