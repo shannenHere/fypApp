@@ -4,7 +4,7 @@ const API_PORT = 5000;
 // Fetch all app IDs from the policies table
 export const getAppIds = async () => {
     try {
-        const response = await fetch(`${API_URL}:${API_PORT}/apps`);
+        const response = await fetch(`${API_URL}/apps`);
         if (!response.ok) {
             throw new Error('Failed to fetch app IDs');
         }
@@ -20,7 +20,7 @@ export const getAppIds = async () => {
 // Fetch details for a specific app by its app_id
 export const getAppDetails = async (appId) => {
     try {
-        const response = await fetch(`${API_URL}:${API_PORT}/app/${appId}`);
+        const response = await fetch(`${API_URL}/app/${appId}`);
         if (!response.ok) {
             throw new Error('App not found');
         }

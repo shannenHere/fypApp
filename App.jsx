@@ -13,6 +13,7 @@ import AccountScreen from './src/screens/AccountScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import CreateAccountScreen from './src/screens/CreateAccountScreen';
 import LogoutScreen from './src/screens/LogOutScreen';
+import AppDetailsScreen from "./src/screens/AppDetailsScreen";
 
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -179,6 +180,7 @@ const App = () => {
                 <NavigationContainer>
                     <Stack.Navigator screenOptions={{ headerShown: false }}>
                         <Stack.Screen name="RightDrawer" component={RightDrawerNavigator} />
+                        <Stack.Screen name="AppDetailsScreen" component={AppDetailsScreen} />
                     </Stack.Navigator>
                 </NavigationContainer>
             </RightDrawerProvider>

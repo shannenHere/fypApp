@@ -4,10 +4,12 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { RightDrawerContext } from '../contexts/RightDrawerContext';
 import { globalStyles } from '../styles/styles';
+import { useAuth } from '../contexts/AuthContext';
 
 const HeaderComponent = ({ title = "Default Title", showBackButton = true }) => {
     const navigation = useNavigation();
     const { openRightDrawer } = useContext(RightDrawerContext);
+    const { user } = useAuth();
 
     return (
     <View style={globalStyles.headerContainer}>
@@ -17,7 +19,7 @@ const HeaderComponent = ({ title = "Default Title", showBackButton = true }) => 
                 <Icon name="bars" style={globalStyles.iconStyle}/>
             </TouchableOpacity>
             <TouchableOpacity onPress={openRightDrawer} style={globalStyles.iconButton}>
-                <Icon name="user" style={globalStyles.iconStyle}/>
+                <Icon name={user ? "user-circle" : "user"} style={globalStyles.iconStyle} />
             </TouchableOpacity>
         </View>
 
