@@ -117,10 +117,7 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
   }, []);
 
   const handleAppClick = (app) => {
-    Alert.alert(
-      'Privacy Alert',
-      `App: ${app.app_name}\nRating: ${app.rating}\nWorst Permission: ${app.worst_permissions}\nConcern: ${app.privacy_concern}`
-    );
+    navigation.navigate("AppDetailsScreen", { appId: app.app_id });
   };
 
   const filteredApps = installedAppsinDB.filter(

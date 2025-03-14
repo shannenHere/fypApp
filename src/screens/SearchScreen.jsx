@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Image } 
 import Icon from "react-native-vector-icons/FontAwesome";
 import HeaderComponent from "../components/Header"; // Example custom header
 import { globalStyles } from "../styles/styles";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { getAppIds } from "../api/api"; // Import your API function
 
 const PAGE_SIZE = 8;
@@ -14,9 +14,13 @@ const SearchScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const navigation = useNavigation();
+  const route = useRoute();
 
   // Fetch all apps from the database on mount
   useEffect(() => {
+    if (route.params?.query) {
+      setSearchTerm(route.params.query);
+    }
     const fetchApps = async () => {
       try {
         const data = await getAppIds(); // Calls API function
@@ -26,7 +30,7 @@ const SearchScreen = () => {
       }
     };
     fetchApps();
-  }, []);
+  }, [route.params]);
 
   // Filter apps based on the searchTerm and selected category
   const filteredApps = apps.filter((app) => {

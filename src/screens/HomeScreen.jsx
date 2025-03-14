@@ -19,19 +19,18 @@ const HomeScreen = () => {
     useEffect(() => {
     }, []);     
 
-    const handleAppClick = (app) => {
-        Alert.alert(
-          'Privacy Alert',
-          `App: ${app.app_name}\nRating: ${app.rating}\nWorst Permission: ${app.worst_permissions}\nConcern: ${app.privacy_concern}`
-        );
-      };
+    const handleCategoryPress = (category) => {
+    // If the same category is clicked again, deselect it (set to default)
+    if (selectedCategory === category) {
+        setSelectedCategory('All'); // Deselect when the same button is clicked
+    } else {
+        setSelectedCategory(category); // Set the new selected category
+    }
+    };
 
-      const handleCategoryPress = (category) => {
-        // If the same category is clicked again, deselect it (set to default)
-        if (selectedCategory === category) {
-            setSelectedCategory('All'); // Deselect when the same button is clicked
-        } else {
-            setSelectedCategory(category); // Set the new selected category
+    const handleSearchPress = () => {
+        if (searchText.trim() !== '') {
+            navigation.navigate('Search', { query: searchText });
         }
     };
 
@@ -46,7 +45,16 @@ const HomeScreen = () => {
                         value={searchText}
                         onChangeText={setSearchText}
                     />
-                    <Icon name="search" style={styles.searchIcon}/>
+                    
+                    {searchText.length > 0 && (
+                        <TouchableOpacity onPress={() => setSearchText("")} style={styles.searchIcon}>
+                            <Icon name="times" style={styles.clearIcon} />
+                        </TouchableOpacity>
+                    )}
+
+                    <TouchableOpacity onPress={handleSearchPress}>
+                        <Icon name="search" style={styles.searchIcon} />
+                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.installedApps}>
@@ -106,6 +114,11 @@ const HomeScreen = () => {
                                 value={installedSearchText}
                                 onChangeText={setInstalledSearchText}
                             />
+                            {installedSearchText.length > 0 && (
+                                <TouchableOpacity onPress={() => setInstalledSearchText("")} style={styles.searchIcon}>
+                                    <Icon name="times" style={styles.clearIcon} />
+                                </TouchableOpacity>
+                            )}
                             <Icon name="search" style={styles.searchIcon}/>
                     </View>
 
