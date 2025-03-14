@@ -72,23 +72,29 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
     }
   };
 
-  // Compare installed apps with database apps; return only those that are in the database,
-  // using the database's fields (e.g., app_name, icon_url, rating).
+  // Merge installed apps with database apps using a dictionary for faster lookups
   const mergeAppsData = (deviceApps, databaseApps) => {
-    const inDb = deviceApps.filter(app =>
-      databaseApps.some(dbApp => dbApp.app_id === app.packageName)
-    ).map(app => {
-      const matchingDb = databaseApps.find(dbApp => dbApp.app_id === app.packageName);
-      return {
-        ...app,
-        app_name: matchingDb.app_name,
-        icon_url: matchingDb.icon_url,
-        rating: matchingDb.rating,
-        worst_permissions: matchingDb.worst_permissions,
-        privacy_concern: matchingDb.privacy_concern,
-      };
+    // Create a dictionary from database apps keyed by app_id
+    const dbAppsMap = {};
+    databaseApps.forEach(dbApp => {
+      dbAppsMap[dbApp.app_id] = dbApp;
     });
-    return inDb;
+    // For each device app, if it exists in the dbAppsMap, merge data
+    const merged = deviceApps.reduce((acc, app) => {
+      const matchingDb = dbAppsMap[app.packageName];
+      if (matchingDb) {
+        acc.push({
+          ...app,
+          app_name: matchingDb.app_name,
+          icon_url: matchingDb.icon_url,
+          rating: matchingDb.rating,
+          worst_permissions: matchingDb.worst_permissions,
+          privacy_concern: matchingDb.privacy_concern,
+        });
+      }
+      return acc;
+    }, []);
+    return merged;
   };
 
   // Fetch both installed apps and database apps, then merge and update state.

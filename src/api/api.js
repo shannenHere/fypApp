@@ -64,3 +64,33 @@ export const loginUser = async (email, password) => {
         return { error: 'Network error' };
     }
 };
+
+// Check if email exists in database
+export const checkEmail = async (email) => {
+    try {
+      const response = await fetch(`${API_URL}/check-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error checking email:', error);
+      return { error: 'Network error' };
+    }
+  };
+
+// Forgot Password: update the user's password and send the new password via email
+export const forgotPassword = async (email, newPassword) => {
+    try {
+      const response = await fetch(`${API_URL}/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, newPassword })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error during forgot password:', error);
+      return { error: 'Network error' };
+    }
+  };

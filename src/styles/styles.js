@@ -85,7 +85,6 @@ invisible: {
   input: { 
     borderWidth: 1, 
     borderRadius: 1, 
-    marginBottom: 20,
     height: 30,
     fontSize: 15,
     paddingVertical: 0,
@@ -97,7 +96,7 @@ invisible: {
       borderRadius: 5, 
       alignItems: "center", 
       marginTop: 10,
-      width: 125,
+      width: 150,
       height: 40,
     },
     InputButtonText: { 
@@ -121,5 +120,10 @@ invisible: {
     InputButtonContainer: {
       flexDirection: 'row',
       justifyContent: "space-between",
+    },
+    errorText: {
+      color: "red",
+      fontSize: 11,
+      marginBottom: 10,
     },
 });

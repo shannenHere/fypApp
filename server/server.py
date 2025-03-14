@@ -87,10 +87,46 @@ def login():
     user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
     conn.close()
 
-    if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    if bcrypt.checkpw(password.encode('utf-8'), user['password']):
         return jsonify({'message': 'Login successful', 'is_admin': user['is_admin']})
     else:
-        return jsonify({'error': 'Invalid email or password'}), 401
+        return jsonify({'error': 'Invalid e-mail or password'}), 401
+
+@app.route('/check-email', methods=['POST'])
+def check_email():
+    data = request.json
+    email = data.get('email')
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    conn.close()
+    return jsonify({'exists': bool(user)})
+
+# Forgot Password
+@app.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.json
+    email = data.get('email')
+    new_password = data.get('newPassword')
+
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    
+    if not user:
+        conn.close()
+        return jsonify({'error': 'User not found'}), 404
+
+    # Hash the new password
+    hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+    conn.execute('UPDATE users SET password = ? WHERE email = ?', (hashed_password, email))
+    conn.commit()
+    conn.close()
+
+    # In a real application, send an email with the new password here.
+    # For now, we'll just return success.
+    return jsonify({'success': True, 'message': 'Password reset successful'})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
