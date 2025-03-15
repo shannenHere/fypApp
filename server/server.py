@@ -32,9 +32,6 @@ def get_apps():
         result.append({
             "app_id": app["app_id"],
             "app_name": app["app_name"],
-            "rating": app["rating"],
-            "worst_permissions": app["worst_permissions"],
-            "privacy_concern": app["privacy_concern"],  # Note the comma here.
             "icon_url": icon_map.get(app["app_id"])  # Use the mapping to add the icon URL.
         })
     return jsonify(result)
@@ -43,15 +40,30 @@ def get_apps():
 @app.route('/app/<string:app_id>', methods=['GET'])
 def get_app_details(app_id):
     conn = get_db_connection()
+    
     # Fetch details from policies table
     app_details = conn.execute('SELECT * FROM policies WHERE app_id = ?', (app_id,)).fetchone()
+    
     # Fetch icon URL from app_icons table
     icon_details = conn.execute('SELECT icon_url FROM app_icons WHERE app_id = ?', (app_id,)).fetchone()
+    
+    # Fetch analysis record from analysis_log table
+    analysis_details = conn.execute('''
+        SELECT privacy_concern, sensitive_sentences, generic_sentences, 
+               worst_permissions, rating, privacy_sentiment, permission_sentiment, avg_sentiment
+        FROM analysis_log 
+        WHERE app_id = ?
+    ''', (app_id,)).fetchone()
+    
     conn.close()
     
     if app_details:
         result = dict(app_details)
         result['icon_url'] = icon_details['icon_url'] if icon_details else None
+
+        if analysis_details:
+            result.update(dict(analysis_details))
+
         return jsonify(result)
     else:
         return jsonify({'error': 'App not found'}), 404

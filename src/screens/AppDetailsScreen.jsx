@@ -11,32 +11,55 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import HeaderComponent from "../components/Header"; // Example custom header
+import HeaderComponent from "../components/Header"; 
+import PermissionsList from "../components/PermissionsList";
 import { globalStyles } from "../styles/styles";
-import { getAppDetails } from "../api/api"; // Your function to fetch a single app's details
+import { getAppDetails } from "../api/api"; 
+import { useAuth } from "../contexts/AuthContext";
 import { useAppList } from "../contexts/AppListContext"; 
+import { getCleanedSensitiveSentences, getWorstPermissions } from "../utils/stringToJSONUtils";
 
 const AppDetailsScreen = () => {
   const route = useRoute();
+  //const { user } = useAuth();
+  const user = true;
   const navigation = useNavigation();
   const { app } = route.params;
   const { installedAppsInDB, setInstalledAppsInDB, installedAppsNotInDB, setInstalledAppsNotInDB } = useAppList();
   const [appDetails, setAppDetails] = useState(null);
   const [installedStatus, setInstalledStatus] = useState("Checking...");
+
+  const [top1Practice, setTop1Practice] = useState("Getting Result...");
+  const [top2Practice, setTop2Practice] = useState("Getting Result...");
+  const [top3Practice, setTop3Practice] = useState("Getting Result...");
+
+  const [top1Permission, setTop1Permission] = useState("Getting Result...");
+  const [top2Permission, setTop2Permission] = useState("Getting Result...");
+  const [top3Permission, setTop3Permission] = useState("Getting Result...");
+
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackList, setFeedbackList] = useState([]); // Example if you store feedback
 
   useEffect(() => { 
-    console.log("Navigated with appId:", app.app_id); 
-    if (!app?.app_id) {
-      console.error("Error: No appId found in route params");
-      return;
-    }
     // Fetch app details from API
     const fetchDetails = async () => {
       try {
         const data = await getAppDetails(app.app_id); 
+        console.log("API Response:", data);
         setAppDetails(data);
+
+        // Ensure deconstruction happens only after details are fetched
+        if (data) {
+          const cleanedSensitiveSentences = getCleanedSensitiveSentences(data.sensitive_sentences) || [];
+          setTop1Practice(cleanedSensitiveSentences[0] || "No data available");
+          setTop2Practice(cleanedSensitiveSentences[1] || "No data available");
+          setTop3Practice(cleanedSensitiveSentences[2] || "No data available");
+
+          const cleanedPermissions = getWorstPermissions(data.worst_permissions) || [];
+          setTop1Permission(cleanedPermissions[0] || "No data available");
+          setTop2Permission(cleanedPermissions[1] || "No data available");
+          setTop3Permission(cleanedPermissions[2] || "No data available");
+        }
       } catch (error) {
         console.error("Error fetching app details:", error);
       }
@@ -44,16 +67,12 @@ const AppDetailsScreen = () => {
 
     fetchDetails();
 
-    console.log("installedAppsInDB:", installedAppsInDB);
-    console.log("Current app ID:", app.app_id);
-
-    if (installedAppsInDB.some((item) => item.app_id === app.app_id)) {
-      setInstalledStatus("Installed");
+    if (user) {
+      setInstalledStatus(installedAppsInDB.some((item) => item.app_id === app.app_id) ? "Installed" : "Not Installed");
     } else {
-      setInstalledStatus("Not Installed");
-    }     
-    
-  }, [app.app_id]);
+      setInstalledStatus("");
+    } 
+  }, [app.app_id, installedAppsInDB]);
 
   // Example feedback submission (locally stored for now)
   const handleFeedbackSubmit = () => {
@@ -77,8 +96,22 @@ const AppDetailsScreen = () => {
   }
 
   return (
-    <View style={globalStyles.container}>
-      <HeaderComponent title={appDetails?.app_name || "App Details"} showBackButton={true} />
+    <View style={styles.container}>
+      <HeaderComponent title="" showBackButton={true} />
+      {/* Installed Status */}
+      <View style={styles.installedStatusContainer}>
+            <Text style={styles.installedStatus}>{installedStatus}</Text>
+      </View>
+
+      {/* Icons for update database*/}
+      <View style={styles.iconRow}>
+              <TouchableOpacity onPress={() => Alert.alert("Database Icon Pressed")}>
+                <Icon name="database" style={styles.databaseIcon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => Alert.alert("Feedback Icon Pressed")}>
+                <Icon name="commenting-o" style={styles.feedbackIcon} />
+              </TouchableOpacity>
+      </View>
 
       <ScrollView style={styles.scrollContainer}>
         {/* Top Section: Icon, Name, Rating, Installed Status */}
@@ -92,21 +125,12 @@ const AppDetailsScreen = () => {
             </View>
           )}
           {/* App Name and Rating */}
-          <View style={{ marginLeft: 10 }}>
-            <Text style={styles.appName}>{appDetails.app_name}</Text>
-            <Text style={styles.appRating}>{appDetails.rating || "Unknown"}</Text>
-          </View>
-          {/* Installed Status */}
-          <View style={{ marginLeft: "auto", alignItems: "center" }}>
-            <Text style={styles.installedStatus}>{installedStatus}</Text>
-            {/* Example icons for trash or chat */}
-            <View style={styles.iconRow}>
-              <TouchableOpacity onPress={() => Alert.alert("Trash Icon Pressed")}>
-                <Icon name="trash" style={styles.smallIcon} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => Alert.alert("Chat Icon Pressed")}>
-                <Icon name="comment" style={styles.smallIcon} />
-              </TouchableOpacity>
+          <View style={styles.nameRatingContainer}>
+            <View style={styles.nameContainer}>
+              <Text style={styles.appName}>{appDetails.app_name}</Text>
+            </View>
+            <View style={styles.ratingContainer}>
+              <Text style={styles.appRating}>{appDetails.rating || "Unknown"}</Text>
             </View>
           </View>
         </View>
@@ -120,14 +144,41 @@ const AppDetailsScreen = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.sectionContent}>
-            {/* Example placeholders for privacy info */}
-            <Text style={styles.itemTitle}>
-              {appDetails.most_concerning_practice || "Most Concerning Practice"}
-            </Text>
-            <Text style={styles.itemDesc}>
-              Description or details about the most concerning practice...
-            </Text>
-            {/* Additional common practices... */}
+            <View>
+              <Text style={styles.redIcon}>
+                {top1Practice.score}
+              </Text>
+              <Text style={styles.itemTitle}>
+                {top1Practice.sensitiveTerms}
+              </Text>
+              <Text style={styles.itemDesc}>
+                {top1Practice.sentence}
+              </Text>
+            </View>
+
+            <View>
+              <Text style={styles.yellowIcon}>
+                {top2Practice.score}
+              </Text>
+              <Text style={styles.itemTitle}>
+                {top2Practice.sensitiveTerms}
+              </Text>
+              <Text style={styles.itemDesc}>
+                {top2Practice.sentence}
+              </Text>
+            </View>
+
+            <View>
+              <Text style={styles.greenIcon}>
+                {top3Practice.score}
+              </Text>
+              <Text style={styles.itemTitle}>
+                {top3Practice.sensitiveTerms}
+              </Text>
+              <Text style={styles.itemDesc}>
+                {top3Practice.sentence}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -140,8 +191,32 @@ const AppDetailsScreen = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.sectionContent}>
-            <Text style={styles.itemTitle}>Most Dangerous Permission</Text>
-            <Text style={styles.itemDesc}>Description about dangerous permission...</Text>
+          <View>
+              <Text style={styles.redIcon}>
+                {top1Permission.score}
+              </Text>
+              <Text style={styles.itemTitle}>
+                {top1Permission.permission}
+              </Text>
+            </View>
+
+            <View>
+              <Text style={styles.yellowIcon}>
+                {top2Permission.score}
+              </Text>
+              <Text style={styles.itemTitle}>
+                {top2Permission.permission}
+              </Text>
+            </View>
+
+            <View>
+              <Text style={styles.greenIcon}>
+                {top3Permission.score}
+              </Text>
+              <Text style={styles.itemTitle}>
+                {top3Permission.permission}
+              </Text>
+            </View>
             {/* Additional common permissions... */}
           </View>
         </View>
@@ -185,8 +260,41 @@ const AppDetailsScreen = () => {
 export default AppDetailsScreen;
 
 const styles = StyleSheet.create({
+  installedStatusContainer:{
+    marginLeft: 70,
+    backgroundColor: "#e8e8e8",
+    width: 100,
+    top: -47,
+    height: 30,
+    justifyContent: "center",
+  },
+  installedStatus: {
+    fontSize: 12,
+    color: "black",
+    marginVertical: 5,
+    marginLeft: 15,
+  },
+  iconRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginRight: 20,
+    top: -45,
+  },
+  databaseIcon: {
+    fontSize: 25,
+    color: "#333",
+    marginLeft: 20,
+  },
+  feedbackIcon: {
+    fontSize: 28,
+    color: "#333",
+    marginLeft: 15,
+    bottom: 3,
+  },
   scrollContainer: {
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
+    paddingLeft: 40,
+    top: -60,
   },
   topSection: {
     flexDirection: "row",
@@ -194,36 +302,39 @@ const styles = StyleSheet.create({
     marginVertical: 15,
   },
   appIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
+    width: 55,
+    height: 55,
   },
   iconPlaceholder: {
     backgroundColor: "#ddd",
     justifyContent: "center",
     alignItems: "center",
   },
+  nameRatingContainer:{
+    marginLeft: 5,
+    width: "100%",
+  },
+  nameContainer: {
+  },
   appName: {
-    fontSize: 18,
+    fontSize: 17.5,
     fontWeight: "bold",
     color: "#000",
+    flexWrap: "wrap",
+    maxWidth: "90%",
+  },
+  ratingContainer: {
+    alignSelf: "flex-end",
+    right: 60,
+    backgroundColor: "#e8e8e8",
+    padding: 1,
+    width: 60,
+    alignItems: "center",
+    height: 20,
   },
   appRating: {
-    fontSize: 14,
-    color: "#555",
-  },
-  installedStatus: {
     fontSize: 12,
-    color: "green",
-    marginBottom: 5,
-  },
-  iconRow: {
-    flexDirection: "row",
-  },
-  smallIcon: {
-    fontSize: 20,
-    color: "#333",
-    marginLeft: 10,
+    color: "black",
   },
   section: {
     marginBottom: 20,
