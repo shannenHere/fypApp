@@ -14,50 +14,46 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import HeaderComponent from "../components/Header"; // Example custom header
 import { globalStyles } from "../styles/styles";
 import { getAppDetails } from "../api/api"; // Your function to fetch a single app's details
-import { InstalledApps } from "react-native-launcher-kit"; // If you need to check "Installed" status
+import { useAppList } from "../contexts/AppListContext"; 
 
 const AppDetailsScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { appId } = route.params; // The app_id passed from previous screen
+  const { app } = route.params;
+  const { installedAppsInDB, setInstalledAppsInDB, installedAppsNotInDB, setInstalledAppsNotInDB } = useAppList();
   const [appDetails, setAppDetails] = useState(null);
   const [installedStatus, setInstalledStatus] = useState("Checking...");
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackList, setFeedbackList] = useState([]); // Example if you store feedback
 
   useEffect(() => { 
-    console.log("Navigated with appId:", appId); 
-    if (!appId) {
+    console.log("Navigated with appId:", app.app_id); 
+    if (!app?.app_id) {
       console.error("Error: No appId found in route params");
       return;
     }
-    // 1. Fetch app details from your API
+    // Fetch app details from API
     const fetchDetails = async () => {
       try {
-        const data = await getAppDetails(appId); 
+        const data = await getAppDetails(app.app_id); 
         setAppDetails(data);
       } catch (error) {
         console.error("Error fetching app details:", error);
       }
     };
 
-    // 2. Check if the app is installed on the device (optional)
-    const checkInstallation = async () => {
-      try {
-        const installedApps = await InstalledApps.getApps();
-        const isInstalled = installedApps.some(
-          (app) => app.packageName === appId
-        );
-        setInstalledStatus(isInstalled ? "Installed" : "Not Installed");
-      } catch (error) {
-        console.error("Error checking installation:", error);
-        setInstalledStatus("Unknown");
-      }
-    };
-
     fetchDetails();
-    checkInstallation();
-  }, [appId]);
+
+    console.log("installedAppsInDB:", installedAppsInDB);
+    console.log("Current app ID:", app.app_id);
+
+    if (installedAppsInDB.some((item) => item.app_id === app.app_id)) {
+      setInstalledStatus("Installed");
+    } else {
+      setInstalledStatus("Not Installed");
+    }     
+    
+  }, [app.app_id]);
 
   // Example feedback submission (locally stored for now)
   const handleFeedbackSubmit = () => {
@@ -74,6 +70,7 @@ const AppDetailsScreen = () => {
   if (!appDetails) {
     return (
       <View style={[globalStyles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <HeaderComponent title="App Details" showBackButton={true} />
         <Text>Loading app details...</Text>
       </View>
     );
@@ -81,7 +78,7 @@ const AppDetailsScreen = () => {
 
   return (
     <View style={globalStyles.container}>
-      <HeaderComponent title="App Details" showBackButton={true} />
+      <HeaderComponent title={appDetails?.app_name || "App Details"} showBackButton={true} />
 
       <ScrollView style={styles.scrollContainer}>
         {/* Top Section: Icon, Name, Rating, Installed Status */}

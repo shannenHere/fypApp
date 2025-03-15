@@ -13,6 +13,7 @@ import {
 import axios from 'axios';
 import { InstalledApps } from 'react-native-launcher-kit';
 import { useNavigation } from '@react-navigation/native';
+import { useAppList } from '../contexts/AppListContext';
 import { globalStyles } from '../styles/styles';
 
 const API_URL = "http://10.0.2.2:5000";
@@ -34,7 +35,7 @@ const normalizeTikTok = (app) => {
 };
 
 const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
-  const [installedAppsinDB, setInstalledAppsinDB] = useState([]);
+  const { installedAppsInDB, setInstalledAppsInDB, installedAppsNotInDB, setInstalledAppsNotInDB } = useAppList();
   const navigation = useNavigation();
   // Fetch installed apps from device
   const fetchInstalledApps = async () => {
@@ -95,6 +96,14 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
       }
       return acc;
     }, []);
+
+    // Find installed apps that are not in database 
+    const installedNotInDB = deviceApps.filter(app => !dbAppsMap[app.packageName]);
+    
+    // Update state
+    setInstalledAppsInDB(merged);
+    setInstalledAppsNotInDB(installedNotInDB);
+
     return merged;
   };
 
@@ -107,7 +116,7 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
       ]);
       const merged = mergeAppsData(deviceApps, databaseApps);
       console.log("Merged apps data:", merged.map(app => `${app.app_name} (${app.packageName})`));
-      setInstalledAppsinDB(merged);
+      setInstalledAppsInDB(merged);
     } catch (error) {
       console.error("Error fetching all data:", error);
     };
@@ -118,10 +127,10 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
   }, []);
 
   const handleAppClick = (app) => {
-    navigation.navigate("AppDetailsScreen", { appId: app.app_id });
+    navigation.navigate("AppDetailsScreen", { app });
   };
 
-  const filteredApps = installedAppsinDB.filter(
+  const filteredApps = installedAppsInDB.filter(
     (app) =>
       app.app_name.toLowerCase().includes(filterText.toLowerCase()) &&
       (category === 'All' || (app.rating && app.rating.toLowerCase() === category.toLowerCase()))

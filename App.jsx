@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { RightDrawerProvider, RightDrawerContext } from './src/contexts/RightDrawerContext';
 import { AuthProvider } from "./src/contexts/AuthContext";
+import { AppListProvider } from "./src/contexts/AppListContext"; 
 import HeaderComponent from './src/components/Header';
 
 import HomeScreen from './src/screens/HomeScreen';
@@ -175,16 +176,18 @@ const RightDrawerNavigator = ({ navigation }) => {
 
 const App = () => {
     return (
-        <AuthProvider>
-            <RightDrawerProvider>
-                <NavigationContainer>
-                    <Stack.Navigator screenOptions={{ headerShown: false }}>
-                        <Stack.Screen name="RightDrawer" component={RightDrawerNavigator} />
-                        <Stack.Screen name="AppDetailsScreen" component={AppDetailsScreen} />
-                    </Stack.Navigator>
-                </NavigationContainer>
-            </RightDrawerProvider>
-        </AuthProvider>
+        <AppListProvider>
+            <AuthProvider>
+                <RightDrawerProvider>
+                    <NavigationContainer>
+                        <Stack.Navigator screenOptions={{ headerShown: false }}>
+                            <Stack.Screen name="RightDrawer" component={RightDrawerNavigator} />
+                            <Stack.Screen name="AppDetailsScreen" component={AppDetailsScreen} />
+                        </Stack.Navigator>
+                    </NavigationContainer>
+                </RightDrawerProvider>
+            </AuthProvider>
+        </AppListProvider>
     );
 };
 

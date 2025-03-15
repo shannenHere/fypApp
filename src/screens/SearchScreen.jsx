@@ -78,8 +78,7 @@ const SearchScreen = () => {
 
   // Navigate to details screen
   const handleAppPress = (app) => {
-    // Pass app_id (or other relevant data) to the details screen
-    navigation.navigate("AppDetailsScreen", { appId: app.app_id });
+    navigation.navigate("AppDetailsScreen", { app });
   };
 
   return (
