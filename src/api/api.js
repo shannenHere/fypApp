@@ -25,7 +25,7 @@ export const getAppDetails = async (appId) => {
             throw new Error('App not found');
         }
         const data = await response.json();
-        console.log('Fetched app details');
+        console.log('Fetched app details.');
         return data;
     } catch (error) {
         console.error('Error fetching app details:', error);

@@ -38,7 +38,9 @@ const AppDetailsScreen = () => {
   const [top3Permission, setTop3Permission] = useState("Getting Result...");
 
   const [feedbackText, setFeedbackText] = useState("");
-  const [feedbackList, setFeedbackList] = useState([]); // Example if you store feedback
+  const [feedbackList, setFeedbackList] = useState([
+    { userName: "John Doe", date: "2025-03-16", text: "Great app!" }
+  ]);  
 
   useEffect(() => { 
     // Fetch app details from API
@@ -113,9 +115,8 @@ const AppDetailsScreen = () => {
               </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scrollContainer}>
-        {/* Top Section: Icon, Name, Rating, Installed Status */}
-        <View style={styles.topSection}>
+      {/* Top Section: Icon, Name, Rating, Installed Status */}
+      <View style={styles.topSection}>
           {/* App Icon */}
           {appDetails.icon_url ? (
             <Image source={{ uri: appDetails.icon_url }} style={styles.appIcon} />
@@ -133,8 +134,9 @@ const AppDetailsScreen = () => {
               <Text style={styles.appRating}>{appDetails.rating || "Unknown"}</Text>
             </View>
           </View>
-        </View>
+      </View>
 
+      <ScrollView style={styles.scrollContainer}>
         {/* Privacy Practice Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -277,7 +279,7 @@ const styles = StyleSheet.create({
   iconRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginRight: 20,
+    marginRight: 30,
     top: -45,
   },
   databaseIcon: {
@@ -292,18 +294,23 @@ const styles = StyleSheet.create({
     bottom: 3,
   },
   scrollContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 30,
     paddingLeft: 40,
     top: -60,
+    maxHeight: 550,
   },
   topSection: {
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 15,
+    top: -80,
+    marginHorizontal: 30,
+    left: 10,
   },
   appIcon: {
     width: 55,
     height: 55,
+    top: 10,
   },
   iconPlaceholder: {
     backgroundColor: "#ddd",
@@ -311,29 +318,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   nameRatingContainer:{
-    marginLeft: 5,
+    marginLeft: 10,
     width: "100%",
+    top: 10,
   },
   nameContainer: {
   },
   appName: {
-    fontSize: 17.5,
+    fontSize: 17,
     fontWeight: "bold",
     color: "#000",
     flexWrap: "wrap",
     maxWidth: "90%",
+    top: 5,
   },
   ratingContainer: {
     alignSelf: "flex-end",
-    right: 60,
+    right: 75,
     backgroundColor: "#e8e8e8",
-    padding: 1,
+    padding: 0,
     width: 60,
     alignItems: "center",
-    height: 20,
+    height: 15,
+    top: 5,
   },
   appRating: {
-    fontSize: 12,
+    fontSize: 10,
     color: "black",
   },
   section: {

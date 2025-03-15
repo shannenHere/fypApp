@@ -32,7 +32,8 @@ def get_apps():
         result.append({
             "app_id": app["app_id"],
             "app_name": app["app_name"],
-            "icon_url": icon_map.get(app["app_id"])  # Use the mapping to add the icon URL.
+            "icon_url": icon_map.get(app["app_id"]),  # Use the mapping to add the icon URL.
+            "rating": app["rating"]
         })
     return jsonify(result)
 

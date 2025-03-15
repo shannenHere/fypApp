@@ -93,6 +93,7 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
           worst_permissions: matchingDb.worst_permissions,
           privacy_concern: matchingDb.privacy_concern,
         });
+        console.log("Merged App:", matchingDb.app_name, "Rating:", matchingDb.rating); // Debug rating
       }
       return acc;
     }, []);
@@ -124,7 +125,7 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
 
   useEffect(() => {
     fetchAllData();
-  }, []);
+  }, [filterText, category]);
 
   const handleAppClick = (app) => {
     navigation.navigate("AppDetailsScreen", { app });
@@ -135,6 +136,11 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
       app.app_name.toLowerCase().includes(filterText.toLowerCase()) &&
       (category === 'All' || (app.rating && app.rating.toLowerCase() === category.toLowerCase()))
   );
+
+  console.log("Filtered Apps:", filteredApps.map(app => ({
+    name: app.app_name,
+    rating: app.rating
+  })));
 
   return (
     <View style={styles.container}>

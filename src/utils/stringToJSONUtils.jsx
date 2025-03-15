@@ -6,7 +6,6 @@ export function getCleanedSensitiveSentences(senstiveSetencesStr) {
         }
 
         let parsedList = JSON.parse(senstiveSetencesStr);
-        console.log("Parsed List:", parsedList);
 
         if (!Array.isArray(parsedList)) {
             console.error("Invalid JSON format: Expected an array.");
@@ -14,8 +13,6 @@ export function getCleanedSensitiveSentences(senstiveSetencesStr) {
         }
 
         let cleanedSentences = parsedList.map(item => {
-            console.log("Processing Item:", item); // Debugging
-
             if (typeof item !== 'string') return null; // Ensure it's a string
 
             // Updated regex to capture: sentence, sensitive terms, and score
@@ -41,7 +38,7 @@ export function getCleanedSensitiveSentences(senstiveSetencesStr) {
             }
         }).filter(Boolean); // Remove null values
 
-        console.log("Cleaned Sentences:", cleanedSentences);
+        cleanedSentences.sort((a, b) => a.score - b.score);
         return cleanedSentences;
     } catch (error) {
         console.error("Error parsing privacy concerns:", error);
