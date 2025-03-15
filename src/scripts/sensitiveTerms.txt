@@ -1,0 +1,53 @@
+credit card
+bank account
+financial
+transaction
+payment
+ssn
+social security
+tax id
+insurance
+investment
+loan
+mortgage
+health
+medical
+hospital
+treatment
+biometric
+fingerprint
+facial recognition
+voiceprint
+DNA
+genetic
+prescription
+diagnosis
+doctor
+patient
+insurance
+location
+geolocation
+gps
+address
+zip code
+postal code
+email
+phone
+contact
+immediate family
+relationship
+sexual orientation
+race
+ethnicity
+religion
+political affiliation
+passport
+driver license
+identification
+ID number
+data brokerage
+profiling
+third-party sharing
+tracking
+collect a version
+web beacons
