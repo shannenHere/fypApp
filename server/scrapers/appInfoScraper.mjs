@@ -84,7 +84,7 @@ async function getAppDetails(appId) {
                 permissions = "None";
             }
         }
-
+        
         return {
             appId,
             appName: appDetails.title,
@@ -178,7 +178,7 @@ export async function fetchPrivacyPolicy(appId) {
             category,
             userFeedback: "",
             dateUpdated: new Date().toISOString(),
-            iconUrl,
+            icon: iconUrl,
         });
 
         console.info(`Successfully saved privacy policy for '${appName}' (${appId}).`);

@@ -1,10 +1,10 @@
-const API_URL = 'http://10.0.2.2:5000'; // For Android emulator; for physical device, use your computer's IP
+const API_URL = 'http://10.0.2.2'; // For Android emulator; for physical device, use your computer's IP
 const API_PORT = 5000;
 
 // Fetch all app IDs from the policies table
 export const getAppIds = async () => {
     try {
-        const response = await fetch(`${API_URL}/apps`);
+        const response = await fetch(`${API_URL}:5000/apps`);
         if (!response.ok) {
             throw new Error('Failed to fetch app IDs');
         }
@@ -20,7 +20,7 @@ export const getAppIds = async () => {
 // Fetch details for a specific app by its app_id
 export const getAppDetails = async (appId) => {
     try {
-        const response = await fetch(`${API_URL}/app/${appId}`);
+        const response = await fetch(`${API_URL}:5000/app/${appId}`);
         if (!response.ok) {
             throw new Error('App not found');
         }
@@ -36,7 +36,7 @@ export const getAppDetails = async (appId) => {
 // Register User
 export const registerUser = async (email, password, isAdmin = 0) => {
     try {
-        const response = await fetch(`${API_URL}/register`, {
+        const response = await fetch(`${API_URL}:5000/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password, is_admin: isAdmin })
@@ -52,7 +52,7 @@ export const registerUser = async (email, password, isAdmin = 0) => {
 // Login User
 export const loginUser = async (email, password) => {
     try {
-        const response = await fetch(`${API_URL}/login`, {
+        const response = await fetch(`${API_URL}:5000/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -68,7 +68,7 @@ export const loginUser = async (email, password) => {
 // Check if email exists in database
 export const checkEmail = async (email) => {
     try {
-      const response = await fetch(`${API_URL}/check-email`, {
+      const response = await fetch(`${API_URL}:5000/check-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -83,7 +83,7 @@ export const checkEmail = async (email) => {
 // Forgot Password: update the user's password and send the new password via email
 export const forgotPassword = async (email, newPassword) => {
     try {
-      const response = await fetch(`${API_URL}/forgot-password`, {
+      const response = await fetch(`${API_URL}:5000/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, newPassword })
@@ -95,4 +95,20 @@ export const forgotPassword = async (email, newPassword) => {
     }
   };
 
-// Fetch privac
+// ---------------------------------------------------------------------------------
+// APIs for scraping (Port: 5001)
+// ---------------------------------------------------------------------------------
+// Fetch privacy policies
+export const scrapePolicy = async (url) => {
+    try {
+      const response = await fetch(`${API_URL}:5001/scrapePolicy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, newPassword })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error during forgot password:', error);
+      return { error: 'Network error' };
+    }
+  };
