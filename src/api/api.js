@@ -101,14 +101,46 @@ export const forgotPassword = async (email, newPassword) => {
 // Fetch privacy policies
 export const scrapePolicy = async (url) => {
     try {
-      const response = await fetch(`${API_URL}:5001/scrapePolicy`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, newPassword })
-      });
-      return await response.json();
+        // Send POST request with the URL to scrape
+        const response = await fetch(`${API_URL}:5001/scrapePolicy`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url }) // Send the URL to the server
+        });
+
+        // Handle the response
+        if (response.ok) {
+            return await response.json(); // Assuming the server returns the scraped data in JSON
+        } else {
+            console.error('Error fetching policy:', response.status);
+            return { error: 'Failed to scrape policy' };
+        }
     } catch (error) {
-      console.error('Error during forgot password:', error);
-      return { error: 'Network error' };
+        console.error('Error during scrape policy:', error);
+        return { error: 'Network error' };
     }
-  };
+};
+
+// Scrape app data & privacy policies & save to database
+export const scrapeData = async (app_id) => {
+    try {
+        // Send POST request with the app_id to scrape data
+        const response = await fetch(`${API_URL}:5001/scrape`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ app_id }) // Send the URL to the server
+        });
+
+        // Handle the response
+        if (response.ok) {
+            return { message: 'App data and privacy policy scraped successfully and saved to the database.' };
+        } else {
+            console.error('Error fetching app data:', response.status);
+            return { error: 'Failed to scrape data' };
+        }
+    } catch (error) {
+        console.error('Error during scraping app data:', error);
+        return { error: 'Network error' };
+    }
+}
+

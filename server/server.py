@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
 import bcrypt
+from analysis.NLPAnalysis_single import NLPAnalysis_single
 
 app = Flask(__name__)
 CORS(app)
@@ -140,6 +141,30 @@ def forgot_password():
     # In a real application, send an email with the new password here.
     # For now, we'll just return success.
     return jsonify({'success': True, 'message': 'Password reset successful'})
+
+# Get result from Sentiment analysis of policies & permissions
+@app.route('/nlp', methods=['GET'])
+def analyze():
+    # Get app_id and flag from query parameters
+    app_id_to_analyze = request.args.get('app_id')
+    flag = request.args.get('flag', '')  # Default to empty string if not provided
+
+    # Check if app_id is provided, if not return an error
+    if not app_id_to_analyze:
+        return jsonify({"error": "app_id is required"}), 400
+    
+    # If flag is provided as 'force', override any previous analysis
+    force_flag = '--force' in flag.split(',')
+
+    try:
+        # Call NLPAnalysis_single with app_id and the force flag
+        result = NLPAnalysis_single(app_id_to_analyze, force_flag)
+        
+        # Return the analysis results as JSON response
+        return jsonify(result), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

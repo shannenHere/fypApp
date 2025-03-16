@@ -53,7 +53,7 @@ app.get('/scrapePolicy', async (req, res) => {
 });
 
 
-// Endpoint to fetch app details using appId
+// Endpoint to fetch app details using appId from google-play-scraper
 app.get('/getAppDetails', async (req, res) => {
     const { appId } = req.query;
 
