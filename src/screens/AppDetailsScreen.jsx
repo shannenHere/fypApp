@@ -107,10 +107,12 @@ const AppDetailsScreen = () => {
 
       {/* Icons for update database*/}
       <View style={styles.iconRow}>
-              <TouchableOpacity onPress={() => Alert.alert("Database Icon Pressed")}>
+              <TouchableOpacity onPress={() => navigation.navigate("UpdateDatabaseScreen", {
+                app: appDetails
+              })}>
                 <Icon name="database" style={styles.databaseIcon} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => Alert.alert("Feedback Icon Pressed")}>
+              <TouchableOpacity onPress={() => navigation.navigate("FeedbacksScreen")}>
                 <Icon name="commenting-o" style={styles.feedbackIcon} />
               </TouchableOpacity>
       </View>

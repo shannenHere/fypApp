@@ -6,7 +6,7 @@ import bcrypt
 app = Flask(__name__)
 CORS(app)
 
-DATABASE = 'database/privacy_policies.db'
+DATABASE = 'scrapers/privacy_policies.db'
 
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)

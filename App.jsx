@@ -15,6 +15,8 @@ import LoginScreen from './src/screens/LoginScreen';
 import CreateAccountScreen from './src/screens/CreateAccountScreen';
 import LogoutScreen from './src/screens/LogOutScreen';
 import AppDetailsScreen from "./src/screens/AppDetailsScreen";
+import UpdateDatabaseScreen from "./src/screens/UpdateDatabaseScreen";
+import FeedbacksScreen from "./src/screens/FeedbacksScreen";
 
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -183,6 +185,8 @@ const App = () => {
                         <Stack.Navigator screenOptions={{ headerShown: false }}>
                             <Stack.Screen name="RightDrawer" component={RightDrawerNavigator} />
                             <Stack.Screen name="AppDetailsScreen" component={AppDetailsScreen} />
+                            <Stack.Screen name="UpdateDatabaseScreen" component={UpdateDatabaseScreen} />
+                            <Stack.Screen name="FeedbacksScreen" component={FeedbacksScreen} />
                         </Stack.Navigator>
                     </NavigationContainer>
                 </RightDrawerProvider>

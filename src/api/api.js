@@ -94,3 +94,5 @@ export const forgotPassword = async (email, newPassword) => {
       return { error: 'Network error' };
     }
   };
+
+// Fetch privac
