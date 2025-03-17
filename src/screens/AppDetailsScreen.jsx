@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import HeaderComponent from "../components/Header"; 
 import PermissionsList from "../components/PermissionsList";
 import { globalStyles } from "../styles/styles";
 import { getAppDetails } from "../api/api"; 
@@ -21,8 +20,7 @@ import { getCleanedSensitiveSentences, getWorstPermissions } from "../utils/stri
 
 const AppDetailsScreen = () => {
   const route = useRoute();
-  //const { user } = useAuth();
-  const user = true;
+  const { user } = useAuth();
   const navigation = useNavigation();
   const { app } = route.params;
   const { installedAppsInDB, setInstalledAppsInDB, installedAppsNotInDB, setInstalledAppsNotInDB } = useAppList();
@@ -91,15 +89,21 @@ const AppDetailsScreen = () => {
   if (!appDetails) {
     return (
       <View style={[globalStyles.container, { justifyContent: "center", alignItems: "center" }]}>
-        <HeaderComponent title="App Details" showBackButton={true} />
         <Text>Loading app details...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <HeaderComponent title="" showBackButton={true} />
+    <View>
+      
+      <TouchableOpacity
+        onPress={() => navigation.goBack()} 
+        style={[globalStyles.iconButton, {top:10}]}
+      >
+        <Icon name="arrow-left" style={globalStyles.backIcon} />
+      </TouchableOpacity>
+      <View style={styles.container}>
       {/* Installed Status */}
       <View style={styles.installedStatusContainer}>
             <Text style={styles.installedStatus}>{installedStatus}</Text>
@@ -257,6 +261,7 @@ const AppDetailsScreen = () => {
           </View>
         </View>
       </ScrollView>
+      </View>
     </View>
   );
 };
@@ -264,11 +269,14 @@ const AppDetailsScreen = () => {
 export default AppDetailsScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    top: -40,
+  },
   installedStatusContainer:{
-    marginLeft: 70,
+    marginLeft: 50,
     backgroundColor: "#e8e8e8",
     width: 100,
-    top: -47,
+    top: 0,
     height: 30,
     justifyContent: "center",
   },
@@ -282,7 +290,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     marginRight: 30,
-    top: -45,
+    top: 0,
   },
   databaseIcon: {
     fontSize: 25,
@@ -298,21 +306,21 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingHorizontal: 30,
     paddingLeft: 40,
-    top: -60,
+    top: 0,
     maxHeight: 550,
   },
   topSection: {
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 15,
-    top: -80,
+    top: -20,
     marginHorizontal: 30,
     left: 10,
   },
   appIcon: {
     width: 55,
     height: 55,
-    top: 10,
+    top: 0,
   },
   iconPlaceholder: {
     backgroundColor: "#ddd",
@@ -322,7 +330,7 @@ const styles = StyleSheet.create({
   nameRatingContainer:{
     marginLeft: 10,
     width: "100%",
-    top: 10,
+    top: 0,
   },
   nameContainer: {
   },
@@ -332,7 +340,7 @@ const styles = StyleSheet.create({
     color: "#000",
     flexWrap: "wrap",
     maxWidth: "90%",
-    top: 5,
+    top: 0,
   },
   ratingContainer: {
     alignSelf: "flex-end",
@@ -342,7 +350,7 @@ const styles = StyleSheet.create({
     width: 60,
     alignItems: "center",
     height: 15,
-    top: 5,
+    top: 0,
   },
   appRating: {
     fontSize: 10,
@@ -402,7 +410,7 @@ const styles = StyleSheet.create({
   },
   feedbackInputContainer: {
     flexDirection: "row",
-    marginTop: 10,
+    marginTop: 0,
     alignItems: "center",
   },
   feedbackInput: {

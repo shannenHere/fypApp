@@ -5,7 +5,9 @@ import { generateRandomPassword } from "../utils/passwordUtils"; // Import the u
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  //force logged in for testing
+  const [user, setUser] = useState({ id: 2, email: "abc@abc.com", isAdmin: false });
+  //const [user, setUser] = useState(null);
 
   // Sign up function using API
   const signUp = async (email, password) => {
@@ -31,7 +33,7 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: result.error };
     }
 
-    setUser({ email, isAdmin: result.is_admin }); // Store user info
+    setUser({ id: result.user_id, email, isAdmin: result.is_admin }); // Store user info
     return { success: true };
   };
 
@@ -67,8 +69,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Helper function to get the current user's ID
+  const getUserId = () => user?.id || null;
+
   return (
-    <AuthContext.Provider value={{ user, signUp, logIn, logOut, forgotPassword }}>
+    <AuthContext.Provider value={{ user, signUp, logIn, logOut, forgotPassword, getUserId }}>
       {children}
     </AuthContext.Provider>
   );

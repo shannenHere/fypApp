@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { RightDrawerProvider, RightDrawerContext } from './src/contexts/RightDrawerContext';
 import { AuthProvider } from "./src/contexts/AuthContext";
 import { AppListProvider } from "./src/contexts/AppListContext"; 
+import { UpdateStatusProvider } from "./src/contexts/UpdateStatusContext";
 import HeaderComponent from './src/components/Header';
 
 import HomeScreen from './src/screens/HomeScreen';
@@ -123,6 +124,7 @@ const LeftDrawerNavigator = () => {
                     header: () => <HeaderComponent title="Logout" showBackButton={true} navigation={navigation} />,
                 })}
             />
+            <Drawer.Screen name="AppDetails" component={AppDetailsScreen} />
         </Drawer.Navigator>
     );
 };
@@ -172,26 +174,30 @@ const RightDrawerNavigator = ({ navigation }) => {
                     options={{ headerShown: false }} 
                 />
             </Drawer.Navigator>
+            <Drawer.Screen name="AppDetails" component={AppDetailsScreen} />
         </RightDrawerProvider>
     );
 };
 
 const App = () => {
     return (
-        <AppListProvider>
-            <AuthProvider>
-                <RightDrawerProvider>
-                    <NavigationContainer>
-                        <Stack.Navigator screenOptions={{ headerShown: false }}>
-                            <Stack.Screen name="RightDrawer" component={RightDrawerNavigator} />
-                            <Stack.Screen name="AppDetailsScreen" component={AppDetailsScreen} />
-                            <Stack.Screen name="UpdateDatabaseScreen" component={UpdateDatabaseScreen} />
-                            <Stack.Screen name="FeedbacksScreen" component={FeedbacksScreen} />
-                        </Stack.Navigator>
-                    </NavigationContainer>
-                </RightDrawerProvider>
-            </AuthProvider>
-        </AppListProvider>
+        <UpdateStatusProvider>
+            <AppListProvider>
+                <AuthProvider>
+                    <RightDrawerProvider>
+                        <NavigationContainer>
+                            <Stack.Navigator screenOptions={{ headerShown: false }}>
+                                <Stack.Screen name="RightDrawer" component={RightDrawerNavigator} />
+                                <Stack.Screen name="AppDetailsScreen" component={AppDetailsScreen} />
+                                <Stack.Screen name="UpdateDatabaseScreen" component={UpdateDatabaseScreen} />
+                                <Stack.Screen name="FeedbacksScreen" component={FeedbacksScreen} />
+                                <Stack.Screen name="AccountScreen" component={AccountScreen} /> 
+                            </Stack.Navigator>
+                        </NavigationContainer>
+                    </RightDrawerProvider>
+                </AuthProvider>
+            </AppListProvider>
+        </UpdateStatusProvider>
     );
 };
 

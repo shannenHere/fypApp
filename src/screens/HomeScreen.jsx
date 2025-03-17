@@ -10,8 +10,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 const API_URL = 'http://10.0.2.2:5000';
 
 const HomeScreen = () => {
-    //const { user } = useAuth();
-    const user = true;
+    const { user } = useAuth();
     const [searchText, setSearchText] = useState('');
     const [installedSearchText, setInstalledSearchText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');

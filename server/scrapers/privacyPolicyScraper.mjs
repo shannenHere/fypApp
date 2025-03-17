@@ -5,7 +5,7 @@ async function getPrivacyPolicyText(url) {
         console.log(`Opening privacy policy page: ${url}`);
 
         const browser = await puppeteer.launch({ 
-            headless: false, 
+            headless: "new", 
             args: ["--ignore-certificate-errors", "--disable-infobars"]}); // Change to true for background mode
         const page = await browser.newPage();
 
@@ -74,5 +74,20 @@ async function getPrivacyPolicyText(url) {
         return "Error retrieving policy.";
     }
 }
+
+/*
+// Accept URL from command line arguments
+const url = process.argv[2];
+
+if (!url) {
+    console.log("Usage: node script.js <URL>");
+    process.exit(1);
+}
+
+// Run the scraper
+getPrivacyPolicyText(url).then((text) => {
+    console.log("\nFull Privacy Policy Extracted:\n", text);
+});
+*/
 
 export { getPrivacyPolicyText };

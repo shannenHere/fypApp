@@ -1,5 +1,4 @@
 const API_URL = 'http://10.0.2.2'; // For Android emulator; for physical device, use your computer's IP
-const API_PORT = 5000;
 
 // Fetch all app IDs from the policies table
 export const getAppIds = async () => {
@@ -17,20 +16,28 @@ export const getAppIds = async () => {
     }
 };
 
-// Fetch details for a specific app by its app_id
+// Fetch details for a specific app by its app_id, retrying once on failure
 export const getAppDetails = async (appId) => {
-    try {
-        const response = await fetch(`${API_URL}:5000/app/${appId}`);
-        if (!response.ok) {
-            throw new Error('App not found');
+    const fetchData = async (attempt) => {
+        try {
+            const response = await fetch(`${API_URL}:5000/app/${appId}`);
+            if (!response.ok) {
+                throw new Error('App not found');
+            }
+            const data = await response.json();
+            console.log('Fetched app details.');
+            return data;
+        } catch (error) {
+            if (attempt === 1) {
+                return fetchData(2); // Try again
+            } else {
+                console.error('Error fetching app details:', error);
+                throw error;
+            }
         }
-        const data = await response.json();
-        console.log('Fetched app details.');
-        return data;
-    } catch (error) {
-        console.error('Error fetching app details:', error);
-        throw error;
-    }
+    };
+
+    return fetchData(1); // Start with first attempt
 };
 
 // Register User
@@ -95,40 +102,118 @@ export const forgotPassword = async (email, newPassword) => {
     }
   };
 
-// ---------------------------------------------------------------------------------
-// APIs for scraping (Port: 5001)
-// ---------------------------------------------------------------------------------
-// Fetch privacy policies
-export const scrapePolicy = async (url) => {
+// Analyze policy & permissions & update in database
+export const analyze = async (app_id) => {
     try {
-        // Send POST request with the URL to scrape
-        const response = await fetch(`${API_URL}:5001/scrapePolicy`, {
+        // Send POST request with the app_id to scrape data
+        const response = await fetch(`${API_URL}:5000/nlp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url }) // Send the URL to the server
+            body: JSON.stringify({ app_id }) // Send the URL to the server
         });
 
         // Handle the response
         if (response.ok) {
             return await response.json(); // Assuming the server returns the scraped data in JSON
         } else {
+            console.error('Error analyzing policy & permissions:', response.status);
+            return { error: 'Failed to analyze policy & permissions' };
+        }
+    } catch (error) {
+        console.error('Error during analyzing policy & permissions:', error);
+        return { error: 'Network error' };
+    }
+}
+
+// Update a specific column for an app in the database
+export const updateAppColumn = async (app_id, column_name, new_value) => {
+    try {
+        const response = await fetch(`${API_URL}:5000/update`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ app_id, column_name, new_value })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update column');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating app column:', error);
+        return { error: 'Network error' };
+    }
+};
+
+export const submitFeedback = async (appId, userId, reason, status, type) => {
+    try {
+        const date = new Date().toISOString();
+
+        const response = await fetch(`${API_URL}:5000/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ app_id: appId, user_id: userId, reason, status, date, type})
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to submit feedback');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error submitting feedback:', error);
+        return { error: 'Network error' };
+    }
+};
+
+
+export const getFeedback = async (appId) => {
+    try {
+        const response = await fetch(`${API_URL}:5000/getFeedback?app_id=${appId}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch feedback');
+        }
+        const data = await response.json();
+        console.log('Fetched feedback:', data);
+        return data;
+    } catch (error) {
+        console.error('Error fetching feedback:', error);
+        return { error: 'Network error' };
+    }
+};
+
+// ---------------------------------------------------------------------------------
+// APIs for scraping (Port: 5001)
+// ---------------------------------------------------------------------------------
+// Fetch privacy policies
+export const scrapePolicy = async (url) => {
+    try {
+        // Send GET request with the URL as a query parameter
+        const response = await fetch(`${API_URL}:5001/scrapePolicy?url=${encodeURIComponent(url)}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.policy_text || ""; // Extract only the text or return empty string if missing
+        } else {
             console.error('Error fetching policy:', response.status);
-            return { error: 'Failed to scrape policy' };
+            return "";
         }
     } catch (error) {
         console.error('Error during scrape policy:', error);
-        return { error: 'Network error' };
+        return "";
     }
 };
 
 // Scrape app data & privacy policies & save to database
 export const scrapeData = async (app_id) => {
     try {
-        // Send POST request with the app_id to scrape data
-        const response = await fetch(`${API_URL}:5001/scrape`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ app_id }) // Send the URL to the server
+        // Send GET request with the app_id as a query parameter
+        const response = await fetch(`${API_URL}:5001/scrape?app_id=${encodeURIComponent(app_id)}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
         });
 
         // Handle the response
@@ -142,5 +227,6 @@ export const scrapeData = async (app_id) => {
         console.error('Error during scraping app data:', error);
         return { error: 'Network error' };
     }
-}
+};
+
 

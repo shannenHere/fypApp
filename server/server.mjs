@@ -21,14 +21,14 @@ app.get('/scrape', async (req, res) => {
 
     try {
         await fetchPrivacyPolicy(appId);  // Call the function with the appId
-        res.status(200).json({ message: `Privacy policy for app ID ${appId} fetched successfully.` });
+        res.status(200).json({ message: `App data for app ID ${appId} fetched successfully.` });
     } catch (error) {
         console.error(`Error fetching privacy policy for app ID ${appId}:`, error);
         res.status(500).json({ error: "An error occurred while fetching the app details and privacy policy." });
     }
 });
 
-// API Endpoint to get privacy policies from URL provided
+// API Endpoint to get privacy policies from a URL
 app.get('/scrapePolicy', async (req, res) => {
     const { url } = req.query;
 
@@ -37,15 +37,13 @@ app.get('/scrapePolicy', async (req, res) => {
     }
 
     try {
-        // Fetch the privacy policy by passing the URL to the function
-        const policyText = await fetchPrivacyPolicy(url);
+        const policyText = await getPrivacyPolicyText(url);
 
-        if (!policyText) {
-            return res.status(404).json({ error: "Privacy policy not found for this URL." });
+        if (!policyText || policyText.length < 50) {
+            return res.status(404).json({ error: "Privacy policy not found or too short." });
         }
 
-        // Return the privacy policy text in the response
-        res.status(200).json({ message: `Privacy policy for ${url} fetched successfully.`, policyText });
+        res.status(200).json({ message: `Privacy policy fetched successfully.`, policyText });
     } catch (error) {
         console.error(`Error fetching privacy policy for ${url}:`, error);
         res.status(500).json({ error: "An error occurred while fetching the privacy policy." });

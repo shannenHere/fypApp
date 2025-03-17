@@ -166,6 +166,124 @@ def analyze():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Update specified column in database
+@app.route('/update', methods=['PUT'])
+def update():
+    data = request.json
+    app_id = data.get('app_id')
+    column_name = data.get('column_name')
+    new_value = data.get('new_value')
+
+    if not app_id or not column_name or new_value is None:
+        return jsonify({'error': 'Missing required parameters'}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Check if updating icon_url
+        if column_name == "icon_url":
+            query = 'UPDATE app_icon SET icon_url = ? WHERE app_id = ?'
+            cursor.execute(query, (new_value, app_id))
+        else:
+            # Validate column_name against allowed list (to prevent SQL injection)
+            allowed_columns = ["policy_text", "policy_url", "last_updated"]  # Add all allowed columns
+            if column_name not in allowed_columns:
+                return jsonify({'error': 'Invalid column name'}), 400
+
+            query = f'UPDATE policies SET {column_name} = ? WHERE app_id = ?'
+            cursor.execute(query, (new_value, app_id))
+
+        conn.commit()
+        conn.close()
+        return jsonify({'message': f'Updated {column_name} successfully'}), 200
+
+    except sqlite3.Error as e:
+        return jsonify({'error': str(e)}), 500
+
+# Submit Feedback (either comment or update database)
+@app.route('/feedback', methods=['POST'])
+def submit_feedback():
+    data = request.json
+    app_id = data.get('app_id')
+    user_id = data.get('user_id')
+    reason = data.get('reason')
+    status = data.get('status')
+    date = data.get('date')
+    feedback_type = data.get('type')
+
+    # Insert feedback into the feedback table
+    conn = get_db_connection()
+    conn.execute('INSERT INTO feedback (app_id, user_id, reason, status, date, type) VALUES (?, ?, ?, ?, ?, ?)',
+                 (app_id, user_id, reason, status, date, feedback_type))
+    conn.commit()
+
+    # Update user_feedback in the policies table
+    # Fetch current user_feedback list (if any)
+    cursor = conn.execute('SELECT user_feedback FROM policies WHERE app_id = ?', (app_id,))
+    result = cursor.fetchone()
+    if result:
+        user_feedback = result[0]  # Get the current user_feedback list as a string
+        if user_feedback:
+            user_feedback_list = user_feedback.split(',')  # Convert to list
+        else:
+            user_feedback_list = []
+        # Append new user_id to the list
+        user_feedback_list.append(str(user_id))  
+        updated_feedback = ','.join(user_feedback_list)  # Convert back to a string
+        conn.execute('UPDATE policies SET user_feedback = ? WHERE app_id = ?', (updated_feedback, app_id))
+    else:
+        # If no feedback exists for this app, create a new list
+        conn.execute('UPDATE policies SET user_feedback = ? WHERE app_id = ?', (str(user_id), app_id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({'message': 'Feedback submitted successfully'})
+
+# Get Feedback
+@app.route('/getFeedback', methods=['GET'])
+def get_feedback():
+    app_id = request.args.get('app_id')
+
+    if not app_id:
+        return jsonify({'error': 'Missing app_id'}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Get feedback IDs from policies table
+        cursor.execute('SELECT user_feedback FROM policies WHERE app_id = ?', (app_id,))
+        result = cursor.fetchone()
+
+        if not result or not result[0]:
+            return jsonify({'message': 'No feedback found for this app'}), 200
+
+        feedback_ids = result[0].split(',')  # Convert comma-separated IDs to list
+
+        # Get detailed feedback from feedback table
+        cursor.execute(f'''
+            SELECT feedback_id, user_id, app_id, reason, status 
+            FROM feedback 
+            WHERE feedback_id IN ({','.join(['?'] * len(feedback_ids))})
+        ''', feedback_ids)
+
+        feedback_data = cursor.fetchall()
+        conn.close()
+
+        # Format results
+        feedback_list = [
+            {'feedback_id': row[0], 'user_id': row[1], 'app_id': row[2], 'reason': row[3], 'status': row[4]}
+            for row in feedback_data
+        ]
+
+        return jsonify({'feedback': feedback_list}), 200
+
+    except sqlite3.Error as e:
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
 
