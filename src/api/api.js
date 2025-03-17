@@ -16,9 +16,9 @@ export const getAppIds = async () => {
     }
 };
 
-// Fetch details for a specific app by its app_id, retrying once on failure
+// Fetch details for a specific app by its app_id, retrying indefinitely on failure
 export const getAppDetails = async (appId) => {
-    const fetchData = async (attempt) => {
+    const fetchData = async () => {
         try {
             const response = await fetch(`${API_URL}:5000/app/${appId}`);
             if (!response.ok) {
@@ -28,16 +28,12 @@ export const getAppDetails = async (appId) => {
             console.log('Fetched app details.');
             return data;
         } catch (error) {
-            if (attempt === 1) {
-                return fetchData(2); // Try again
-            } else {
-                console.error('Error fetching app details:', error);
-                throw error;
-            }
+            console.log('Error fetching app details, retrying...');
+            return fetchData(); // Retry the fetch indefinitely
         }
     };
 
-    return fetchData(1); // Start with first attempt
+    return fetchData(); // Start the fetch process
 };
 
 // Register User

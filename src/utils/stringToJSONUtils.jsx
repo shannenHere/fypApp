@@ -51,15 +51,37 @@ export function getWorstPermissions(worstPermissionsStr) {
         // Convert JSON string to an array
         let parsedList = JSON.parse(worstPermissionsStr);
 
+        // Define a mapping for permissions that need to be cleaned or grouped
+        const permissionMappings = {
+            'calendar': 'Calendar',
+            'photos/media/files': 'Photos/Media/Files',
+            'location': 'Location',
+            'camera': 'Camera'
+        };
+
         // Extract permission name, description, and score
         let cleanedPermissions = parsedList.map(item => {
             let match = item.match(/\('(.+?)', '(.+?)', (\d+(\.\d+)?)\)/);
-            return match ? { 
-                permission: match[1], 
-                description: match[2], 
-                score: parseFloat(match[3]) 
-            } : null;
-        }).filter(Boolean);
+            if (match) {
+                let permission = match[1].toLowerCase(); // Convert to lowercase for matching
+                let description = match[2];
+                let score = parseFloat(match[3]);
+
+                // Apply permission mapping if available
+                if (permissionMappings[permission]) {
+                    permission = permissionMappings[permission];
+                } else {
+                    permission = permission.charAt(0).toUpperCase() + permission.slice(1); // Capitalize first letter
+                }
+
+                return {
+                    permission,
+                    description,
+                    score
+                };
+            }
+            return null;
+        }).filter(Boolean); // Remove null entries
 
         return cleanedPermissions;
     } catch (error) {

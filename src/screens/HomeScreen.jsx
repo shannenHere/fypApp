@@ -132,7 +132,7 @@ const HomeScreen = () => {
                     </View>
 
                     {/* Installed Apps Section - Only Visible If User is Logged In */}
-                    {user ? (
+                    {user?.id ? (
                         <View style={styles.installedAppsGrid}>
                             <InstalledAppsList filterText={installedSearchText} category={selectedCategory}/>
                         </View>
