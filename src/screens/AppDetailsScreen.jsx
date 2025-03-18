@@ -193,16 +193,23 @@ const handleSubmitFeedback = async () => {
       <ScrollView 
         ref={scrollViewRef} 
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }} // Increase padding at the bottom
-        keyboardShouldPersistTaps="handled" // Allows tap interaction when keyboard is open
+        keyboardShouldPersistTaps="handled" // Allows tap interaction when keyboard is 
+        scrollEnabled={false}
       >
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()} 
-          style={globalStyles.iconButton}
-        >
-          <Icon name="arrow-left" style={globalStyles.backIcon} />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        onPress={() => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          } else {
+            navigation.navigate("Home");
+          }
+        }}
+        style={globalStyles.iconButton}
+      >
+        <Icon name="arrow-left" style={globalStyles.backIcon} />
+      </TouchableOpacity>
+    </View>
       <View style={styles.container}>
       {/* Installed Status */}
       {user?.id && (
@@ -217,7 +224,7 @@ const handleSubmitFeedback = async () => {
               })}>
                 <Icon name="database" style={styles.databaseIcon} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen")}>
+              <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen", { installedStatus, appDetails })}>
                 <Icon name="commenting-o" style={styles.feedbackIcon} />
               </TouchableOpacity>
       </View>
@@ -371,7 +378,7 @@ const handleSubmitFeedback = async () => {
             ) : (
               feedbackList.map((feedback, index) => (
                 <View key={index} style={styles.feedbackContainer}>
-                  <Icon name="user-circle" size={30} />
+                  <Icon name="user-circle" size={35} />
                   <View>
                     <View style={styles.nameDateContainer}>
                       <Text style={styles.feedbackUser}>{feedback.user_email}</Text>
@@ -389,7 +396,7 @@ const handleSubmitFeedback = async () => {
           <View style={styles.userInfoRow}>
             <View style={styles.iconContainer}>
               {/* Replace with your icon */}
-              <Icon name="user-circle" size={25}/>
+              <Icon name="user-circle" size={30}/>
             </View>
             <Text style={styles.email}>{user?.email}</Text>
           </View>
@@ -505,7 +512,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     right: 65,
     height: 15,
-    top: -15,
+    top: 0,
     borderWidth: 0.5,
   },
   appRating: {
@@ -604,12 +611,13 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     fontSize: 10,
     marginLeft: 5,
-    //alignSelf: "flex-end",
+    marginTop: -3,
   },
   feedbackText: {
     fontSize: 12,
     color: "#333",
     marginLeft: 5,
+    marginTop: -5,
   },
   feedbackInputContainer: {
     marginTop: 0,

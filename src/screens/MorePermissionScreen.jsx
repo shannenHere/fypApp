@@ -104,7 +104,7 @@ const MorePermissionScreen = () => {
                 })}>
                 <Icon name="database" style={styles.databaseIcon} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen")}>
+                              <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen", { installedStatus, appDetails })}>
                 <Icon name="commenting-o" style={styles.feedbackIcon} />
                 </TouchableOpacity>
             </View>
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
         top: 0,
       },
       listContainer: {
-        height: 193,
+        height: 150,
         borderWidth: 1,
         marginTop: -5,
         marginBottom: 10,

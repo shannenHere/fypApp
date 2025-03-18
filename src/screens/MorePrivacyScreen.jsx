@@ -77,7 +77,7 @@ const MorePrivacyScreen = () => {
                     })}>
                     <Icon name="database" style={styles.databaseIcon} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen")}>
+                                  <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen", { installedStatus, appDetails })}>
                     <Icon name="commenting-o" style={styles.feedbackIcon} />
                     </TouchableOpacity>
                 </View>
