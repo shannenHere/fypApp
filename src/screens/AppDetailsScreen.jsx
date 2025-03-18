@@ -7,7 +7,7 @@ import {
   ScrollView, 
   TextInput, 
   StyleSheet, 
-  Alert 
+  ActivityIndicator
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -25,6 +25,11 @@ const AppDetailsScreen = () => {
   const { installedAppsInDB, setInstalledAppsInDB, installedAppsNotInDB, setInstalledAppsNotInDB } = useAppList();
   const [appDetails, setAppDetails] = useState(null);
   const [installedStatus, setInstalledStatus] = useState("Checking...");
+
+  const [appDetailsLoading, setAppDetailsLoading] = useState(false);
+  const [privacyLoading, setPrivacyLoading] = useState(false);
+  const [permissionsLoading, setPermissionsLoading] = useState(false);
+  const [feedbacksLoading, setFeedbacksLoading] = useState(false);
 
   const [top1Practice, setTop1Practice] = useState({sentence: "Getting Result...", sensitiveTerms: "Getting Result...", score: "?"});
   const [top2Practice, setTop2Practice] = useState({sentence: "Getting Result...", sensitiveTerms: "Getting Result...", score: "?"});
@@ -76,16 +81,40 @@ const AppDetailsScreen = () => {
     } 
   }, [app.app_id, installedAppsInDB]);
 
-  // Example feedback submission (locally stored for now)
-  const handleFeedbackSubmit = () => {
-    if (!feedbackText.trim()) return;
-    const newFeedback = {
-      userName: "User Name", 
-      date: new Date().toLocaleDateString(),
-      text: feedbackText,
-    };
-    setFeedbackList([...feedbackList, newFeedback]);
-    setFeedbackText("");
+  const handleViewMoreAppDetails = async () => {
+    setAppDetailsLoading(true); // Start loading immediately
+    
+    setTimeout(() => {
+      navigation.navigate("MoreAppDetailsScreen", { installedStatus, appDetails });
+      setAppDetailsLoading(false); // Stop loading after navigation
+    }, 50); // Small delay to ensure UI updates before navigation
+  };
+
+  const handleViewMorePrivacy = async () => {
+    setPrivacyLoading(true); // Start loading immediately
+    
+    setTimeout(() => {
+      navigation.navigate("MorePrivacyScreen", { installedStatus, appDetails });
+      setPrivacyLoading(false); // Stop loading after navigation
+    }, 50); // Small delay to ensure UI updates before navigation
+  };
+
+  const handleViewMorePermisions = async () => {
+    setPermissionsLoading(true); // Start loading immediately
+    
+    setTimeout(() => {
+      navigation.navigate("MorePermissionScreen", { installedStatus, appDetails });
+      setPermissionsLoading(false); // Stop loading after navigation
+    }, 50); // Small delay to ensure UI updates before navigation
+  };
+
+  const handleViewMoreFeedbacks= async () => {
+    setFeedbacksLoading(true); // Start loading immediately
+    
+    setTimeout(() => {
+      navigation.navigate("MoreFeedbacksScreen", { installedStatus, appDetails });
+      setFeedbacksLoading(false); // Stop loading after navigation
+    }, 50); // Small delay to ensure UI updates before navigation
   };
 
   if (!appDetails) {
@@ -140,9 +169,9 @@ const AppDetailsScreen = () => {
             <View style={styles.nameContainer}>
               <Text style={styles.appName}>{appDetails.app_name}</Text>
               <View style={{top: -10,}}>
-            <TouchableOpacity onPress={() => navigation.navigate("MoreAppDetailsScreen")}>
-              <Text style={[styles.viewMore]}>View More</Text>
-            </TouchableOpacity>
+              <TouchableOpacity onPress={handleViewMoreAppDetails} disabled={appDetailsLoading}>
+                {appDetailsLoading ? <Text style={styles.viewMore}>Loading...</Text> : <Text style={styles.viewMore}>View More</Text>}
+              </TouchableOpacity>
             </View>
               {appDetails.rating === "good" && (
                 <View style={[styles.ratingContainer, {backgroundColor: "#008000"}]}>
@@ -168,8 +197,8 @@ const AppDetailsScreen = () => {
   <View style={styles.section}>
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>Privacy Practice</Text>
-      <TouchableOpacity onPress={() => navigation.navigate("MorePrivacyScreen", { installedStatus, appDetails})}>
-        <Text style={styles.viewMore}>View More</Text>
+      <TouchableOpacity onPress={handleViewMorePrivacy} disabled={privacyLoading}>
+        {privacyLoading ? <Text style={styles.viewMore}>Loading...</Text> : <Text style={styles.viewMore}>View More</Text>}
       </TouchableOpacity>
     </View>
     <ScrollView style={styles.sectionContentScrollView}>
@@ -224,8 +253,8 @@ const AppDetailsScreen = () => {
   <View style={styles.section}>
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>Permissions</Text>
-      <TouchableOpacity onPress={() => navigation.navigate("MorePermissionsScreen")}>
-        <Text style={styles.viewMore}>View More</Text>
+      <TouchableOpacity onPress={handleViewMorePermisions} disabled={permissionsLoading}>
+        {permissionsLoading ? <Text style={styles.viewMore}>Loading...</Text> : <Text style={styles.viewMore}>View More</Text>}
       </TouchableOpacity>
     </View>
     <ScrollView style={styles.sectionContentScrollView}>
@@ -268,8 +297,8 @@ const AppDetailsScreen = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Feedback</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen")}>
-              <Text style={styles.viewMore}>View More</Text>
+            <TouchableOpacity onPress={handleViewMoreFeedbacks} disabled={feedbacksLoading}>
+              {feedbacksLoading ? <Text style={styles.viewMore}>Loading...</Text> : <Text style={styles.viewMore}>View More</Text>}
             </TouchableOpacity>
           </View>
           {/* Example of listing feedback */}

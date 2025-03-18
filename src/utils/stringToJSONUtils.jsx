@@ -142,7 +142,12 @@ export function getWorstPermissions(worstPermissionsStr) {
             'calendar': 'Calendar',
             'photos/media/files': 'Photos/Media/Files',
             'location': 'Location',
-            'camera': 'Camera'
+            'camera': 'Camera',
+            'storage': 'Storage',
+            'microphone': 'Microphone',
+            'contacts': 'Contacts',
+            'network': 'Network',
+            'other': 'Other'
         };
 
         // Extract permission name, description, and score
@@ -160,10 +165,60 @@ export function getWorstPermissions(worstPermissionsStr) {
                     permission = permission.charAt(0).toUpperCase() + permission.slice(1); // Capitalize first letter
                 }
 
+                return { permission, description, score };
+            }
+            return null;
+        })
+        .filter(Boolean)  // Remove null entries
+        .filter(item => item.score !== 1); // Exclude scores equal to 1
+
+        return cleanedPermissions;
+    } catch (error) {
+        console.error("Error parsing worst permissions:", error);
+        return [];
+    }
+}
+
+export function getAllPermissions(allPermissionsStr) {
+    try {
+        if (typeof allPermissionsStr !== 'string') {
+            console.error("Invalid input: Expected a string.");
+            return [];
+        }
+
+        // Define a mapping for permissions that need to be cleaned or grouped
+        const permissionMappings = {
+            'calendar': 'Calendar',
+            'photos/media/files': 'Photos/Media/Files',
+            'location': 'Location',
+            'camera': 'Camera',
+            'storage': 'Storage',
+            'microphone': 'Microphone',
+            'contacts': 'Contacts',
+            'network': 'Network',
+            'other': 'Other'
+        };
+
+        // Convert the string into an array by splitting on `;`
+        let permissionList = allPermissionsStr.split(";").map(item => item.trim());
+
+        // Extract permission and category
+        let cleanedPermissions = permissionList.map(item => {
+            let match = item.match(/(.+?)\s*\((.+?)\)/); // Extracts "Permission" and "Category"
+            if (match) {
+                let description = match[1].toLowerCase(); // Normalize to lowercase
+                let permission = match[2];
+
+                // Apply permission mappings if available
+                if (permissionMappings[permission]) {
+                    permission = permissionMappings[permission];
+                } else {
+                    permission = permission.charAt(0).toUpperCase() + permission.slice(1);
+                }
+
                 return {
                     permission,
-                    description,
-                    score
+                    description
                 };
             }
             return null;
@@ -171,7 +226,7 @@ export function getWorstPermissions(worstPermissionsStr) {
 
         return cleanedPermissions;
     } catch (error) {
-        console.error("Error parsing worst permissions:", error);
+        console.error("Error parsing permissions:", error);
         return [];
     }
 }

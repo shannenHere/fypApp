@@ -1,8 +1,8 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView} from 'react-native';
 import { globalStyles } from '../styles/styles';
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { getCleanedPrivacySentences, getCleanedSensitiveSentences, getCleanedGenericSentences, getWorstPermissions } from "../utils/stringToJSONUtils";
+import { getCleanedPrivacySentences, getCleanedSensitiveSentences, getCleanedGenericSentences } from "../utils/stringToJSONUtils";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -17,6 +17,11 @@ const MorePrivacyScreen = () => {
     const cleanedGenericSentences = getCleanedGenericSentences(appDetails.generic_sentences);
 
     const avgPrivacySentiment = appDetails.privacy_sentiment;
+
+    // Prevent rerenders
+    const handleGoBack = useCallback(() => {
+        navigation.goBack();
+    }, [navigation]);
 
     const HeaderRow = ({ title, count }) => (
         <View style={styles.headerRow}>
@@ -49,12 +54,12 @@ const MorePrivacyScreen = () => {
     return (
         <View style={globalStyles.container}>
             <View style={styles.header}>
-                    <TouchableOpacity
-                      onPress={() => navigation.goBack()} 
-                      style={globalStyles.iconButton}
-                    >
-                      <Icon name="arrow-left" style={globalStyles.backIcon} />
-                    </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={handleGoBack} 
+                    style={globalStyles.iconButton}
+                >
+                    <Icon name="arrow-left" style={globalStyles.backIcon} />
+                </TouchableOpacity>
             </View>
         <View>
                 {/* Installed Status */}
@@ -164,8 +169,6 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     fontSize: 20,
-    //fontWeight: "bold",
-    //top: 5,
   },
   iconContainer:{
     flexDirection: "row",

@@ -160,7 +160,7 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
                 </Text>
                 <TouchableOpacity 
                   style={styles.searchButton} 
-                  onPress={() => navigation.navigate('SearchScreen')}
+                  onPress={() => navigation.navigate("Main", { screen: "CreateAccount" })}
                 >
                   <Text style={styles.searchButtonText}>Go to Search</Text>
                 </TouchableOpacity>
