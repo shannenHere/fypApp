@@ -3,7 +3,7 @@ import { View, Text} from 'react-native';
 import HeaderComponent from '../components/Header';
 import { globalStyles } from '../styles/styles';
 
-const FeedbacksScreen = () => {
+const MorePermissionScreen = () => {
     return (
         <View style={globalStyles.container}>
             <HeaderComponent title="Feedbacks" showBackButton={true}/>
@@ -12,4 +12,4 @@ const FeedbacksScreen = () => {
     );
 };
 
-export default FeedbacksScreen;
+export default MorePermissionScreen;

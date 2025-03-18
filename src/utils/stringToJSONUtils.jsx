@@ -1,11 +1,50 @@
-export function getCleanedSensitiveSentences(senstiveSetencesStr) {
+export function getCleanedPrivacySentences(privacySentencesStr) {
     try {
-        if (typeof senstiveSetencesStr !== 'string') {
+        if (typeof privacySentencesStr !== 'string') {
             console.error("Invalid input: Expected a JSON string.");
             return [];
         }
 
-        let parsedList = JSON.parse(senstiveSetencesStr);
+        let parsedList = JSON.parse(privacySentencesStr);
+
+        if (!Array.isArray(parsedList)) {
+            console.error("Invalid JSON format: Expected an array.");
+            return [];
+        }
+
+        let cleanedSentences = parsedList.map(item => {
+            if (typeof item !== 'string') return null; // Ensure it's a string
+
+            // Regex for privacy sentences: sentence + score (no sensitive/generic terms)
+            let match = item.match(/["'](.+?)["'],\s*([\d.-]+)/);
+
+            if (match) {
+                return {
+                    sentence: match[1],
+                    score: parseFloat(match[2]) // Extracted score
+                };
+            } else {
+                console.warn("No match found for privacy sentence:", item);
+                return null;
+            }
+        }).filter(Boolean); // Remove null values
+
+        cleanedSentences.sort((a, b) => a.score - b.score);
+        return cleanedSentences;
+    } catch (error) {
+        console.error("Error parsing privacy sentences:", error);
+        return [];
+    }
+}
+
+export function getCleanedSensitiveSentences(sensitiveSentencesStr) {
+    try {
+        if (typeof sensitiveSentencesStr !== 'string') {
+            console.error("Invalid input: Expected a JSON string.");
+            return [];
+        }
+
+        let parsedList = JSON.parse(sensitiveSentencesStr);
 
         if (!Array.isArray(parsedList)) {
             console.error("Invalid JSON format: Expected an array.");
@@ -33,7 +72,7 @@ export function getCleanedSensitiveSentences(senstiveSetencesStr) {
                     score: parseFloat(match[3]) // Extracted score
                 };
             } else {
-                console.warn("No match found for:", item);
+                console.warn("No match found for senstivie sentence:", item);
                 return null;
             }
         }).filter(Boolean); // Remove null values
@@ -41,7 +80,54 @@ export function getCleanedSensitiveSentences(senstiveSetencesStr) {
         cleanedSentences.sort((a, b) => a.score - b.score);
         return cleanedSentences;
     } catch (error) {
-        console.error("Error parsing privacy concerns:", error);
+        console.error("Error parsing sensitive sentence:", error);
+        return [];
+    }
+}
+
+export function getCleanedGenericSentences(genericSentencesStr) {
+    try {
+        if (typeof genericSentencesStr !== 'string') {
+            console.error("Invalid input: Expected a JSON string.");
+            return [];
+        }
+
+        let parsedList = JSON.parse(genericSentencesStr);
+
+        if (!Array.isArray(parsedList)) {
+            console.error("Invalid JSON format: Expected an array.");
+            return [];
+        }
+
+        let cleanedSentences = parsedList.map(item => {
+            if (typeof item !== 'string') return null; // Ensure it's a string
+
+            // Regex to match both an array or a single string for the generic term
+            let match = item.match(/["'](.+?)["'],\s*(?:\[(.*?)\]|["'](.+?)["']),\s*([\d.-]+)/);
+
+            if (match) {
+                let sentence = match[1]; // Extracted sentence
+                let rawTerms = match[2] ? match[2].split(",").map(term => term.trim()) : [match[3]]; // Handle array or single string
+                let score = parseFloat(match[4]); // Extracted score
+
+                // Capitalize first letter of each term
+                let formattedTerms = rawTerms.map(term => term.charAt(0).toUpperCase() + term.slice(1)).join(", ");
+
+                return {
+                    sentence,
+                    genericTerms: formattedTerms,
+                    score
+                };
+            } else {
+                console.warn("No match found for generic sentence:", item);
+                return null;
+            }
+        }).filter(Boolean); // Remove null values
+
+        cleanedSentences.sort((a, b) => a.score - b.score);
+        return cleanedSentences;
+    } catch (error) {
+        console.error("Error parsing generic sentences:", error);
         return [];
     }
 }

@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import PermissionsList from "../components/PermissionsList";
 import { globalStyles } from "../styles/styles";
 import { getAppDetails } from "../api/api"; 
 import { useAuth } from "../contexts/AuthContext";
@@ -40,6 +39,8 @@ const AppDetailsScreen = () => {
     { email: "abc@abc.com", date: "2025-03-16", text: "Great app!" }
   ]);  
 
+  const [cleanedPermissions, setCleanedPermissions] = useState([]);
+
   useEffect(() => { 
     // Fetch app details from API
     const fetchDetails = async () => {
@@ -56,6 +57,7 @@ const AppDetailsScreen = () => {
           setTop3Practice(cleanedSensitiveSentences[2] || "No data available");
 
           const cleanedPermissions = getWorstPermissions(data.worst_permissions) || [];
+          setCleanedPermissions(cleanedPermissions);
           setTop1Permission(cleanedPermissions[0] || "No data available");
           setTop2Permission(cleanedPermissions[1] || "No data available");
           setTop3Permission(cleanedPermissions[2] || "No data available");
@@ -118,7 +120,7 @@ const AppDetailsScreen = () => {
               })}>
                 <Icon name="database" style={styles.databaseIcon} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.navigate("FeedbacksScreen")}>
+              <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen")}>
                 <Icon name="commenting-o" style={styles.feedbackIcon} />
               </TouchableOpacity>
       </View>
@@ -138,7 +140,7 @@ const AppDetailsScreen = () => {
             <View style={styles.nameContainer}>
               <Text style={styles.appName}>{appDetails.app_name}</Text>
               <View style={{top: -10,}}>
-            <TouchableOpacity onPress={() => Alert.alert("View More About App")}>
+            <TouchableOpacity onPress={() => navigation.navigate("MoreAppDetailsScreen")}>
               <Text style={[styles.viewMore]}>View More</Text>
             </TouchableOpacity>
             </View>
@@ -166,7 +168,7 @@ const AppDetailsScreen = () => {
   <View style={styles.section}>
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>Privacy Practice</Text>
-      <TouchableOpacity onPress={() => Alert.alert("View More Privacy")}>
+      <TouchableOpacity onPress={() => navigation.navigate("MorePrivacyScreen", { installedStatus, appDetails})}>
         <Text style={styles.viewMore}>View More</Text>
       </TouchableOpacity>
     </View>
@@ -222,7 +224,7 @@ const AppDetailsScreen = () => {
   <View style={styles.section}>
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>Permissions</Text>
-      <TouchableOpacity onPress={() => Alert.alert("View More Permissions")}>
+      <TouchableOpacity onPress={() => navigation.navigate("MorePermissionsScreen")}>
         <Text style={styles.viewMore}>View More</Text>
       </TouchableOpacity>
     </View>
@@ -266,7 +268,7 @@ const AppDetailsScreen = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Feedback</Text>
-            <TouchableOpacity onPress={() => Alert.alert("View More Feedback")}>
+            <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen")}>
               <Text style={styles.viewMore}>View More</Text>
             </TouchableOpacity>
           </View>
