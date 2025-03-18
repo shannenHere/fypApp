@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   View, 
   Text, 
@@ -7,7 +7,11 @@ import {
   ScrollView, 
   TextInput, 
   StyleSheet, 
-  ActivityIndicator
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+  Alert
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -18,6 +22,7 @@ import { useAppList } from "../contexts/AppListContext";
 import { getCleanedSensitiveSentences, getWorstPermissions } from "../utils/stringToJSONUtils";
 
 const AppDetailsScreen = () => {
+  const scrollViewRef = useRef(null);
   const route = useRoute();
   const { user } = useAuth();
   const navigation = useNavigation();
@@ -25,6 +30,8 @@ const AppDetailsScreen = () => {
   const { installedAppsInDB, setInstalledAppsInDB, installedAppsNotInDB, setInstalledAppsNotInDB } = useAppList();
   const [appDetails, setAppDetails] = useState(null);
   const [installedStatus, setInstalledStatus] = useState("Checking...");
+
+  const [forceRender, setForceRender] = useState(false);
 
   const [privacyLoading, setPrivacyLoading] = useState(false);
   const [permissionsLoading, setPermissionsLoading] = useState(false);
@@ -62,7 +69,7 @@ const AppDetailsScreen = () => {
         console.error("Error fetching feedback:", error);
     }
   }
-  
+
   useEffect(() => { 
     // Fetch app details from API
     const fetchDetails = async () => {
@@ -96,6 +103,14 @@ const AppDetailsScreen = () => {
       setInstalledStatus("");
     } 
     fetchFeedbacks();
+
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    });
+
+    return () => {
+      keyboardDidHideListener.remove();
+    };
   }, [app.app_id, installedAppsInDB]);
 
   const handleViewMorePrivacy = async () => {
@@ -133,18 +148,53 @@ const AppDetailsScreen = () => {
     );
   }
 
-  const handleSubmitFeedback = async () => {
-    if (!feedbackText.trim()) return;
+// Improved handleSubmitFeedback function
+const handleSubmitFeedback = async () => {
+  if (!feedbackText.trim()) {
+    Alert.alert("Error", "Feedback cannot be empty.");
+    return;
+  }
 
-    const response = await submitFeedback(app.app_id, user.user_id, feedbackText, 'pending', 'comment');
-    if (!response.error) {
-        setFeedbackText('');
-        fetchFeedbacks(); // Refresh feedback list after submission
+  try {
+    console.log("Submitting feedback with the following data:", {
+      app_id: appDetails.app_id,
+      user_id: user.id,
+      reason: feedbackText,
+      status: "NA",  // or any value you set for status
+      type: "comment",  // or any value you set for type
+    });
+    
+    const response = await submitFeedback(appDetails.app_id, user.id, feedbackText, "NA", "comment");
+
+    if (response.error) {
+      console.error("Error submitting feedback:", response.error);
+      Alert.alert("Error", "Failed to submit feedback.");
+      return;
     }
-  };
 
+    Alert.alert("Success", "Feedback submitted successfully!");
+    
+    // Clear input and refresh feedback list
+    setFeedbackText("");
+    fetchFeedbacks(); 
+
+  } catch (error) {
+    console.error("Error submitting feedback:", error);
+    Alert.alert("Error", "Something went wrong. Please try again.");
+  }
+};
+  
   return (
-    <View>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      style={{ flex: 1 }}
+    >
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} accessible={false}>
+      <ScrollView 
+        ref={scrollViewRef} 
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }} // Increase padding at the bottom
+        keyboardShouldPersistTaps="handled" // Allows tap interaction when keyboard is open
+      >
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()} 
@@ -316,20 +366,23 @@ const AppDetailsScreen = () => {
           </View>
           {/* Example of listing feedback */}
           <ScrollView style={[styles.sectionContentScrollView]}>
-            {feedbackList.length === 0 ? (
+          {feedbackList.length === 0 ? (
               <Text>No feedback available</Text>
             ) : (
-              <View>
-                <Icon name="user-circle" size={30}/>
-                <View>
-                  <View style={styles.nameDateContainer}>
-                    <Text style={styles.feedbackUser}>{user.email}</Text>
-                    <Text style={styles.feedbackDate}>{user.date}</Text>
+              feedbackList.map((feedback, index) => (
+                <View key={index} style={styles.feedbackContainer}>
+                  <Icon name="user-circle" size={30} />
+                  <View>
+                    <View style={styles.nameDateContainer}>
+                      <Text style={styles.feedbackUser}>{feedback.user_email}</Text>
+                      <Text style={styles.feedbackDate}>{feedback.date}</Text>
+                    </View>
+                    <Text style={styles.feedbackType}>{`<${feedback.type}>`}</Text>
+                    <Text style={styles.feedbackText}>{feedback.reason}</Text>
                   </View>
-                  <Text style={styles.feedbackText}>{user.text}</Text>
                 </View>
-                </View>
-            )}
+              ))
+           )}
           </ScrollView>
           <View style={styles.feedbackInputContainer}>
           {/* Current User Section */}
@@ -347,9 +400,9 @@ const AppDetailsScreen = () => {
               style={styles.input}
               placeholder="Enter comment..."
               value={feedbackText}
-              onChangetext={setFeedbackText}
+              onChangeText={(text) => setFeedbackText(text)}
             />
-            <TouchableOpacity style={styles.submitButton}>
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmitFeedback}>
               <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
           </View>
@@ -357,7 +410,9 @@ const AppDetailsScreen = () => {
           </View>
         </View>
       </View>
-    </View>
+      </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -536,11 +591,20 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     justifyContent: "space-between",
   },
+  feedbackContainer: {
+    flexDirection: "row",
+  },
   feedbackUser: {
     fontSize: 10,
   },
   feedbackDate: {
+    fontSize: 8,
+  },
+  feedbackType: {
+    fontStyle: "italic",
     fontSize: 10,
+    marginLeft: 5,
+    //alignSelf: "flex-end",
   },
   feedbackText: {
     fontSize: 12,

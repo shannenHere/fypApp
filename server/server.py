@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
 import bcrypt
+import datetime
 from analysis.NLPAnalysis_single import NLPAnalysis_single
 
 app = Flask(__name__)
@@ -11,6 +12,7 @@ DATABASE = 'scrapers/privacy_policies.db'
 
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
+    conn.execute('PRAGMA foreign_keys = ON')  # Enable foreign key constraints
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -209,10 +211,11 @@ def submit_feedback():
     user_id = data.get('user_id')
     reason = data.get('reason')
     status = data.get('status')
-    date = data.get('date')
+    date = data.get('date') or datetime.datetime.now().isoformat()
     feedback_type = data.get('type')
 
     if not all([app_id, user_id, reason, status, date, feedback_type]):
+        app.logger.error('Missing required fields')
         return jsonify({'error': 'Missing required fields'}), 400
 
     conn = get_db_connection()
@@ -228,12 +231,11 @@ def submit_feedback():
         cursor = conn.execute('SELECT user_feedback FROM policies WHERE app_id = ?', (app_id,))
         result = cursor.fetchone()
 
-        if result:
+        user_feedback_list = []
+        if result and result[0]:
             user_feedback = result[0]
-            user_feedback_list = user_feedback.split(',') if user_feedback else []
-        else:
-            user_feedback_list = []
-
+            user_feedback_list = user_feedback.split(',')
+        
         user_feedback_list.append(str(feedback_id))  # Store feedback_id instead of user_id
         updated_feedback = ','.join(user_feedback_list)
 
@@ -241,7 +243,8 @@ def submit_feedback():
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
-        return jsonify({'error': str(e)}), 500
+        app.logger.error(f"Error inserting feedback: {str(e)}")
+        return jsonify({'error': 'Database error occurred, please try again later'}), 500
     finally:
         conn.close()
 
@@ -281,21 +284,28 @@ def get_feedback():
         ''', feedback_ids)
 
         feedback_data = cursor.fetchall()
-        conn.close()
 
-        # Format results
-        feedback_list = [
-            {
-                'feedback_id': row['feedback_id'],
-                'user_id': row['user_id'],
-                'app_id': row['app_id'],
-                'reason': row['reason'],
-                'status': row['status'],
-                'date': row['date'],
-                'type': row['type']
-            }
-            for row in feedback_data
-        ]
+        # For each feedback, get the user email
+        feedback_list = []
+        for row in feedback_data:
+            feedback_id, user_id, app_id, reason, status, date, feedback_type = row
+
+            # Get the user email for each feedback
+            cursor.execute('SELECT email FROM users WHERE id = ?', (user_id,))
+            user_result = cursor.fetchone()
+            user_email = user_result[0] if user_result else None
+
+            # Add the feedback details with user email
+            feedback_list.append({
+                'feedback_id': feedback_id,
+                'user_id': user_id,
+                'app_id': app_id,
+                'reason': reason,
+                'status': status,
+                'date': date,
+                'type': feedback_type,
+                'user_email': user_email  # Added user email from users table
+            })
 
         return jsonify({'feedback': feedback_list}), 200
 

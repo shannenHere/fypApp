@@ -144,24 +144,26 @@ export const updateAppColumn = async (app_id, column_name, new_value) => {
 export const submitFeedback = async (appId, userId, reason, status, type) => {
     try {
         const date = new Date().toISOString();
+        console.log("Sending feedback:", { appId, userId, reason, status, date, type });
 
         const response = await fetch(`${API_URL}:5000/feedback`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ app_id: appId, user_id: userId, reason, status, date, type})
+            body: JSON.stringify({ app_id: appId, user_id: userId, reason, status, date, type })
         });
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText); // Log the response error body
             throw new Error('Failed to submit feedback');
         }
 
         return await response.json();
     } catch (error) {
         console.error('Error submitting feedback:', error);
-        return { error: 'Network error' };
+        return { error: error.message || 'Network error' };
     }
 };
-
 
 export const getFeedback = async (appId) => {
     try {
