@@ -47,7 +47,7 @@ const UpdateDatabaseScreen = () => {
                     )}
                     <View style={styles.appInfoDescContainer}>
                         <Text style={styles.appInfoDescText}>{app?.app_name}</Text>
-                        <Text style={styles.appInfoDescText}>{app?.app_id}</Text>
+                        <Text style={[styles.appInfoDescText, {fontSize: 12}]}>{app?.app_id}</Text>
                     </View>
                 </View>
 

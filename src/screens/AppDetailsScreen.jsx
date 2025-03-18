@@ -12,7 +12,7 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { globalStyles } from "../styles/styles";
-import { getAppDetails } from "../api/api"; 
+import { getAppDetails, getFeedback, submitFeedback } from "../api/api"; 
 import { useAuth } from "../contexts/AuthContext";
 import { useAppList } from "../contexts/AppListContext"; 
 import { getCleanedSensitiveSentences, getWorstPermissions } from "../utils/stringToJSONUtils";
@@ -26,7 +26,6 @@ const AppDetailsScreen = () => {
   const [appDetails, setAppDetails] = useState(null);
   const [installedStatus, setInstalledStatus] = useState("Checking...");
 
-  const [appDetailsLoading, setAppDetailsLoading] = useState(false);
   const [privacyLoading, setPrivacyLoading] = useState(false);
   const [permissionsLoading, setPermissionsLoading] = useState(false);
   const [feedbacksLoading, setFeedbacksLoading] = useState(false);
@@ -40,12 +39,30 @@ const AppDetailsScreen = () => {
   const [top3Permission, setTop3Permission] = useState({description: "Getting Result...", permission: "Getting Result...", score: "?"});
 
   const [feedbackText, setFeedbackText] = useState("");
-  const [feedbackList, setFeedbackList] = useState([
-    { email: "abc@abc.com", date: "2025-03-16", text: "Great app!" }
-  ]);  
+  const [feedbackList, setFeedbackList] = useState([]);  
 
-  const [cleanedPermissions, setCleanedPermissions] = useState([]);
+  const fetchFeedbacks = async () => {
+    try {
+      const response = await getFeedback(app.app_id);
+      console.log("Feedback API Response: ", response);
 
+      if (response.error) {
+          console.error("API Error:", response.error);
+          return;
+      }
+
+      // Ensure `feedback` exists in the response
+      if (response.feedback) {
+          setFeedbackList(response.feedback); // Store only the array
+      } else {
+          setFeedbackList([]); // No feedback found, set an empty list
+      }
+
+    } catch (error) {
+        console.error("Error fetching feedback:", error);
+    }
+  }
+  
   useEffect(() => { 
     // Fetch app details from API
     const fetchDetails = async () => {
@@ -62,7 +79,6 @@ const AppDetailsScreen = () => {
           setTop3Practice(cleanedSensitiveSentences[2] || "No data available");
 
           const cleanedPermissions = getWorstPermissions(data.worst_permissions) || [];
-          setCleanedPermissions(cleanedPermissions);
           setTop1Permission(cleanedPermissions[0] || "No data available");
           setTop2Permission(cleanedPermissions[1] || "No data available");
           setTop3Permission(cleanedPermissions[2] || "No data available");
@@ -79,16 +95,8 @@ const AppDetailsScreen = () => {
     } else {
       setInstalledStatus("");
     } 
+    fetchFeedbacks();
   }, [app.app_id, installedAppsInDB]);
-
-  const handleViewMoreAppDetails = async () => {
-    setAppDetailsLoading(true); // Start loading immediately
-    
-    setTimeout(() => {
-      navigation.navigate("MoreAppDetailsScreen", { installedStatus, appDetails });
-      setAppDetailsLoading(false); // Stop loading after navigation
-    }, 50); // Small delay to ensure UI updates before navigation
-  };
 
   const handleViewMorePrivacy = async () => {
     setPrivacyLoading(true); // Start loading immediately
@@ -124,6 +132,16 @@ const AppDetailsScreen = () => {
       </View>
     );
   }
+
+  const handleSubmitFeedback = async () => {
+    if (!feedbackText.trim()) return;
+
+    const response = await submitFeedback(app.app_id, user.user_id, feedbackText, 'pending', 'comment');
+    if (!response.error) {
+        setFeedbackText('');
+        fetchFeedbacks(); // Refresh feedback list after submission
+    }
+  };
 
   return (
     <View>
@@ -168,11 +186,6 @@ const AppDetailsScreen = () => {
           <View style={styles.nameRatingContainer}>
             <View style={styles.nameContainer}>
               <Text style={styles.appName}>{appDetails.app_name}</Text>
-              <View style={{top: -10,}}>
-              <TouchableOpacity onPress={handleViewMoreAppDetails} disabled={appDetailsLoading}>
-                {appDetailsLoading ? <Text style={styles.viewMore}>Loading...</Text> : <Text style={styles.viewMore}>View More</Text>}
-              </TouchableOpacity>
-            </View>
               {appDetails.rating === "good" && (
                 <View style={[styles.ratingContainer, {backgroundColor: "#008000"}]}>
                   <Text style={styles.appRating}>{appDetails.rating}</Text>
@@ -303,18 +316,20 @@ const AppDetailsScreen = () => {
           </View>
           {/* Example of listing feedback */}
           <ScrollView style={[styles.sectionContentScrollView]}>
-            {feedbackList.map((item, index) => (
-              <View key={index} style={styles.feedbackItem}>
+            {feedbackList.length === 0 ? (
+              <Text>No feedback available</Text>
+            ) : (
+              <View>
                 <Icon name="user-circle" size={30}/>
                 <View>
                   <View style={styles.nameDateContainer}>
-                    <Text style={styles.feedbackUser}>{item.email}</Text>
-                    <Text style={styles.feedbackDate}>{item.date}</Text>
+                    <Text style={styles.feedbackUser}>{user.email}</Text>
+                    <Text style={styles.feedbackDate}>{user.date}</Text>
                   </View>
-                  <Text style={styles.feedbackText}>{item.text}</Text>
+                  <Text style={styles.feedbackText}>{user.text}</Text>
                 </View>
-              </View>
-            ))}
+                </View>
+            )}
           </ScrollView>
           <View style={styles.feedbackInputContainer}>
           {/* Current User Section */}
@@ -330,7 +345,7 @@ const AppDetailsScreen = () => {
           <View style={styles.updateFeedbackRow}>
             <TextInput
               style={styles.input}
-              placeholder="Enter comment"
+              placeholder="Enter comment..."
               value={feedbackText}
               onChangetext={setFeedbackText}
             />

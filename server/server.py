@@ -212,34 +212,40 @@ def submit_feedback():
     date = data.get('date')
     feedback_type = data.get('type')
 
-    # Insert feedback into the feedback table
-    conn = get_db_connection()
-    conn.execute('INSERT INTO feedback (app_id, user_id, reason, status, date, type) VALUES (?, ?, ?, ?, ?, ?)',
-                 (app_id, user_id, reason, status, date, feedback_type))
-    conn.commit()
+    if not all([app_id, user_id, reason, status, date, feedback_type]):
+        return jsonify({'error': 'Missing required fields'}), 400
 
-    # Update user_feedback in the policies table
-    # Fetch current user_feedback list (if any)
-    cursor = conn.execute('SELECT user_feedback FROM policies WHERE app_id = ?', (app_id,))
-    result = cursor.fetchone()
-    if result:
-        user_feedback = result[0]  # Get the current user_feedback list as a string
-        if user_feedback:
-            user_feedback_list = user_feedback.split(',')  # Convert to list
+    conn = get_db_connection()
+    try:
+        # Insert feedback into the feedback table
+        cursor = conn.execute(
+            'INSERT INTO feedback (app_id, user_id, reason, status, date, type) VALUES (?, ?, ?, ?, ?, ?)',
+            (app_id, user_id, reason, status, date, feedback_type)
+        )
+        feedback_id = cursor.lastrowid
+
+        # Update user_feedback in policies table
+        cursor = conn.execute('SELECT user_feedback FROM policies WHERE app_id = ?', (app_id,))
+        result = cursor.fetchone()
+
+        if result:
+            user_feedback = result[0]
+            user_feedback_list = user_feedback.split(',') if user_feedback else []
         else:
             user_feedback_list = []
-        # Append new user_id to the list
-        user_feedback_list.append(str(user_id))  
-        updated_feedback = ','.join(user_feedback_list)  # Convert back to a string
+
+        user_feedback_list.append(str(feedback_id))  # Store feedback_id instead of user_id
+        updated_feedback = ','.join(user_feedback_list)
+
         conn.execute('UPDATE policies SET user_feedback = ? WHERE app_id = ?', (updated_feedback, app_id))
-    else:
-        # If no feedback exists for this app, create a new list
-        conn.execute('UPDATE policies SET user_feedback = ? WHERE app_id = ?', (str(user_id), app_id))
+        conn.commit()
+    except sqlite3.Error as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
 
-    conn.commit()
-    conn.close()
-
-    return jsonify({'message': 'Feedback submitted successfully'})
+    return jsonify({'message': 'Feedback submitted successfully', 'feedback_id': feedback_id}), 201
 
 # Get Feedback
 @app.route('/getFeedback', methods=['GET'])
@@ -249,8 +255,8 @@ def get_feedback():
     if not app_id:
         return jsonify({'error': 'Missing app_id'}), 400
 
+    conn = get_db_connection()
     try:
-        conn = get_db_connection()
         cursor = conn.cursor()
 
         # Get feedback IDs from policies table
@@ -258,15 +264,20 @@ def get_feedback():
         result = cursor.fetchone()
 
         if not result or not result[0]:
-            return jsonify({'message': 'No feedback found for this app'}), 200
+            return jsonify({'feedback': []}), 200  # Return empty list if no feedback exists
 
-        feedback_ids = result[0].split(',')  # Convert comma-separated IDs to list
+        feedback_ids = result[0].split(',')
+
+        # Ensure feedback_ids contains valid values before querying
+        if not feedback_ids or feedback_ids == ['']:
+            return jsonify({'feedback': []}), 200
 
         # Get detailed feedback from feedback table
+        placeholders = ','.join(['?'] * len(feedback_ids))
         cursor.execute(f'''
-            SELECT feedback_id, user_id, app_id, reason, status 
+            SELECT feedback_id, user_id, app_id, reason, status, date, type
             FROM feedback 
-            WHERE feedback_id IN ({','.join(['?'] * len(feedback_ids))})
+            WHERE feedback_id IN ({placeholders})
         ''', feedback_ids)
 
         feedback_data = cursor.fetchall()
@@ -274,7 +285,15 @@ def get_feedback():
 
         # Format results
         feedback_list = [
-            {'feedback_id': row[0], 'user_id': row[1], 'app_id': row[2], 'reason': row[3], 'status': row[4]}
+            {
+                'feedback_id': row['feedback_id'],
+                'user_id': row['user_id'],
+                'app_id': row['app_id'],
+                'reason': row['reason'],
+                'status': row['status'],
+                'date': row['date'],
+                'type': row['type']
+            }
             for row in feedback_data
         ]
 
@@ -282,6 +301,8 @@ def get_feedback():
 
     except sqlite3.Error as e:
         return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
 
 
 if __name__ == '__main__':
