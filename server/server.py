@@ -185,7 +185,7 @@ def update():
 
         # Check if updating icon_url
         if column_name == "icon_url":
-            query = 'UPDATE app_icon SET icon_url = ? WHERE app_id = ?'
+            query = 'UPDATE app_icons SET icon_url = ? WHERE app_id = ?'
             cursor.execute(query, (new_value, app_id))
         else:
             # Validate column_name against allowed list (to prevent SQL injection)
@@ -314,6 +314,101 @@ def get_feedback():
     finally:
         conn.close()
 
+# Update processing status
+@app.route('/updateStatus', methods=['POST'])
+def update_status():
+    data = request.json
+    feedback_id = data.get('feedback_id')
+    user_id = data.get('user_id')  # Include user ID
+    status = data.get('status')
+    date = data.get('date') or datetime.datetime.now().isoformat()
+
+    if not all([feedback_id, user_id, status, date]):
+        app.logger.error('Missing required fields')
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE feedback
+            SET status = ?, date = ?
+            WHERE feedback_id = ? AND user_id = ?
+        ''', (status, date, feedback_id, user_id))
+
+        if cursor.rowcount == 0:
+            return jsonify({'error': 'No feedback found or unauthorized'}), 404
+
+        conn.commit()
+    except sqlite3.Error as e:
+        conn.rollback()
+        app.logger.error(f"Error updating feedback status: {str(e)}")
+        return jsonify({'error': 'Database error occurred, please try again later'}), 500
+    finally:
+        conn.close()
+
+    return jsonify({'message': 'Feedback status updated successfully', 'feedback_id': feedback_id}), 200
+
+
+#------------------------------------------------------------------------------------------------------------
+# Check and append generic & sensitive terms
+#-------------------------------------------------------------------------------------------------------------
+import os
+import re
+
+# File paths:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Server directory
+ANALYSIS_DIR = os.path.join(BASE_DIR, "analysis")      # Analysis folder
+GENERIC_TERMS_FILE = os.path.join(ANALYSIS_DIR, "genericTerms.txt")
+SENSITIVE_TERMS_FILE = os.path.join(ANALYSIS_DIR, "sensitiveTerms.txt")
+
+def check_and_append_phrase(file_path, phrase):
+    """Check if phrase exists in the file, if not, append it."""
+    if not os.path.exists(file_path):
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(phrase + "\n")
+        return {"message": f"File created and phrase added to {os.path.basename(file_path)}"}
+
+    # Read file contents
+    with open(file_path, "r", encoding="utf-8") as file:
+        lines = [line.strip().lower() for line in file.readlines()]
+
+    # Check for an exact word match using regex
+    phrase_lower = phrase.lower().strip()
+    if any(re.search(rf"\b{re.escape(phrase_lower)}\b", line) for line in lines):
+        return {"message": f"Phrase already exists in {os.path.basename(file_path)}"}
+
+    # Append phrase to file
+    with open(file_path, "a", encoding="utf-8") as file:
+        file.write("\n" + phrase)
+
+    return {"message": f"Phrase added successfully to {os.path.basename(file_path)}"}
+
+@app.route("/addTerms", methods=["POST"])
+def check_append_api():
+    """API endpoint to check and append a phrase in the correct file."""
+    try:
+        data = request.get_json()
+        term = data.get("term", "").strip()
+        category = data.get("category", "generic").strip().lower()  # Default to 'generic'
+
+        if not term:
+            return jsonify({"error": "Phrase cannot be empty."}), 400
+
+        # Determine which file to use based on category
+        if category == "generic":
+            file_path = GENERIC_TERMS_FILE
+        elif category == "sensitive":
+            file_path = SENSITIVE_TERMS_FILE
+        else:
+            return jsonify({"error": "Invalid category. Use 'generic' or 'sensitive'."}), 400
+
+        # Process the phrase
+        result = check_and_append_phrase(file_path, term)
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

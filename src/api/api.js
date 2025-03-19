@@ -101,16 +101,13 @@ export const forgotPassword = async (email, newPassword) => {
 // Analyze policy & permissions & update in database
 export const analyze = async (app_id) => {
     try {
-        // Send POST request with the app_id to scrape data
-        const response = await fetch(`${API_URL}:5000/nlp`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ app_id }) // Send the URL to the server
+        const response = await fetch(`${API_URL}:5000/nlp?app_id=${app_id}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
         });
 
-        // Handle the response
         if (response.ok) {
-            return await response.json(); // Assuming the server returns the scraped data in JSON
+            return await response.json();
         } else {
             console.error('Error analyzing policy & permissions:', response.status);
             return { error: 'Failed to analyze policy & permissions' };
@@ -119,7 +116,7 @@ export const analyze = async (app_id) => {
         console.error('Error during analyzing policy & permissions:', error);
         return { error: 'Network error' };
     }
-}
+};
 
 // Update a specific column for an app in the database
 export const updateAppColumn = async (app_id, column_name, new_value) => {
@@ -180,28 +177,82 @@ export const getFeedback = async (appId) => {
     }
 };
 
+export const updateProcessingStatus = async (feedbackId, userId, status) => {
+    try {
+        const date = new Date().toISOString();
+        console.log("Updating status:", { feedbackId, userId, status, date });
+
+        const response = await fetch(`${API_URL}:5000/updateStatus`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ feedback_id: feedbackId, user_id: userId, status, date })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText); // Log the response error body
+            throw new Error(`Failed to update feedback status: ${errorText}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating feedback status:', error);
+        return { error: error.message || 'Network error' };
+    }
+};
+
+// Check and add generic/sensitive terms
+export const addTerm = async (term, category) => {
+    try {
+        const response = await fetch(`${API_URL}:5000/addTerms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ term, category})
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText); // Log the response error body
+            throw new Error(`Failed to update generic/sensitive terms: ${errorText}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error adding terms:', error);
+        return { error: error.message || 'Network error' };
+    }
+};
+
 // ---------------------------------------------------------------------------------
 // APIs for scraping (Port: 5001)
 // ---------------------------------------------------------------------------------
 // Fetch privacy policies
 export const scrapePolicy = async (url) => {
     try {
-        // Send GET request with the URL as a query parameter
-        const response = await fetch(`${API_URL}:5001/scrapePolicy?url=${encodeURIComponent(url)}`, {
+        // Construct the request URL
+        const requestURL = `${API_URL}:5001/scrapePolicy?url=${encodeURIComponent(url)}`;
+
+        // Send GET request
+        const response = await fetch(requestURL, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            return data.policy_text || ""; // Extract only the text or return empty string if missing
-        } else {
-            console.error('Error fetching policy:', response.status);
+        // Handle non-200 responses
+        if (!response.ok) {
+            console.error(`Error fetching policy: ${response.status} ${response.statusText}`);
             return "";
         }
+
+        const data = await response.json();
+        if (typeof data === "string") {
+            return JSON.parse(data); // Convert the string to JSON if needed
+        }
+
+        return data; // Ensure this is an object like { policyText: "..." }
     } catch (error) {
-        console.error('Error during scrape policy:', error);
-        return "";
+        console.error("Error scraping policy:", error);
+        return { policyText: "" }; // Return a valid object structure
     }
 };
 

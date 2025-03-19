@@ -112,9 +112,6 @@ const MoreFeedbacksScreen = () => {
                     })}>
                       <Icon name="database" style={styles.databaseIcon} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen")}>
-                      <Icon name="commenting-o" style={styles.feedbackIcon} />
-                    </TouchableOpacity>
             </View>
       
             {/* Top Section: Icon, Name, Rating, Installed Status */}

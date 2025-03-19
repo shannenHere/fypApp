@@ -36,6 +36,10 @@ app.get('/scrapePolicy', async (req, res) => {
         return res.status(400).json({ error: "A URL is required" });
     }
 
+    // Decode the encoded URL
+    url = decodeURIComponent(url);
+    console.log("Decoded URL:", url); // Debug log
+    
     try {
         const policyText = await getPrivacyPolicyText(url);
 

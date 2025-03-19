@@ -31,7 +31,6 @@ processed directly by our payment processors
 enforce our agreements
 will not receive
 unsubscribe options
-contest
 enhance your experience
 does not gather
 not be able to offer you this feature
@@ -58,3 +57,4 @@ effective as of
 we appreciate your trust
 working to build
 skip to main content
+location
