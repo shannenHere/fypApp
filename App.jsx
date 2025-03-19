@@ -16,7 +16,6 @@ import CreateAccountScreen from './src/screens/CreateAccountScreen';
 import LogoutScreen from './src/screens/LogOutScreen';
 import AppDetailsScreen from "./src/screens/AppDetailsScreen";
 import UpdateDatabaseScreen from "./src/screens/UpdateDatabaseScreen";
-import MoreAppDetailsScreen from "./src/screens/MoreAppDetailsScreen";
 import MorePrivacyScreen from "./src/screens/MorePrivacyScreen";
 import MorePermissionScreen from "./src/screens/MorePermissionScreen";
 import MoreFeedbacksScreen from "./src/screens/MoreFeedbacksScreen";
@@ -192,7 +191,6 @@ const App = () => {
                             <Stack.Screen name="AppDetailsScreen" component={AppDetailsScreen} />
                             <Stack.Screen name="UpdateDatabaseScreen" component={UpdateDatabaseScreen} />
                             <Stack.Screen name="AccountScreen" component={AccountScreen} /> 
-                            <Stack.Screen name="MoreAppDetailsScreen" component={MoreAppDetailsScreen} />
                             <Stack.Screen name="MorePrivacyScreen" component={MorePrivacyScreen} />
                             <Stack.Screen name="MorePermissionScreen" component={MorePermissionScreen} />
                             <Stack.Screen name="MoreFeedbacksScreen" component={MoreFeedbacksScreen} />

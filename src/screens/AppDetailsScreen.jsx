@@ -50,25 +50,25 @@ const AppDetailsScreen = () => {
 
   const fetchFeedbacks = async () => {
     try {
-      const response = await getFeedback(app.app_id);
-      console.log("Feedback API Response: ", response);
+        const response = await getFeedback(app.app_id);
+        console.log("Feedback API Response: ", response);
 
-      if (response.error) {
-          console.error("API Error:", response.error);
-          return;
-      }
+        if (response.error) {
+            console.error("API Error:", response.error);
+            return;
+        }
 
-      // Ensure `feedback` exists in the response
-      if (response.feedback) {
-          setFeedbackList(response.feedback); // Store only the array
-      } else {
-          setFeedbackList([]); // No feedback found, set an empty list
-      }
-
+        if (response.feedback) {
+            // Sort feedback by date in descending order (latest first)
+            const sortedFeedback = response.feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
+            setFeedbackList(sortedFeedback);
+        } else {
+            setFeedbackList([]);
+        }
     } catch (error) {
         console.error("Error fetching feedback:", error);
     }
-  }
+};
 
   useEffect(() => { 
     // Fetch app details from API
@@ -372,7 +372,10 @@ const handleSubmitFeedback = async () => {
             </TouchableOpacity>
           </View>
           {/* Example of listing feedback */}
-          <ScrollView style={[styles.sectionContentScrollView]}>
+          <ScrollView 
+            style={[styles.sectionContentScrollView]}
+            contentContainerStyle={{ paddingBottom: 10 }}
+          >
           {feedbackList.length === 0 ? (
               <Text>No feedback available</Text>
             ) : (

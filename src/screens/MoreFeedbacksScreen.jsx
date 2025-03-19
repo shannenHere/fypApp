@@ -19,26 +19,26 @@ const MoreFeedbacksScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const fetchFeedbacks = async () => {
-      try {
+    try {
         const response = await getFeedback(appDetails.app_id);
         console.log("Feedback API Response: ", response);
-  
+
         if (response.error) {
             console.error("API Error:", response.error);
             return;
         }
-  
-        // Ensure `feedback` exists in the response
+
         if (response.feedback) {
-            setFeedbackList(response.feedback); // Store only the array
+            // Sort feedback by date in descending order (latest first)
+            const sortedFeedback = response.feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
+            setFeedbackList(sortedFeedback);
         } else {
-            setFeedbackList([]); // No feedback found, set an empty list
+            setFeedbackList([]);
         }
-  
-      } catch (error) {
-          console.error("Error fetching feedback:", error);
-      }
-  }
+    } catch (error) {
+        console.error("Error fetching feedback:", error);
+    }
+};
 
   useEffect(() => { 
     fetchFeedbacks();
@@ -222,7 +222,10 @@ const MoreFeedbacksScreen = () => {
                   </View>
               </View>
                 {/* Example of listing feedback */}
-                <ScrollView style={[styles.sectionContentScrollView]}>
+                <ScrollView 
+                  style={[styles.sectionContentScrollView]}
+                  contentContainerStyle={{ paddingBottom: 5 }}
+                >
                 {feedbackList.length === 0 ? (
                   <Text style={styles.noText}>No feedback available</Text>
                 ) : (
@@ -501,8 +504,8 @@ const styles = StyleSheet.create({
   sectionContentScrollView: {
     backgroundColor: "#f9f9f9",
     paddingHorizontal: 5,
-    paddingVertical: 10,
-    height: 300,
+    paddingVertical: 2,
+    height: 350,
     borderWidth: 1,
     marginBottom: 5,
     marginTop: 10,
