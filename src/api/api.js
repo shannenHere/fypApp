@@ -177,6 +177,30 @@ export const getFeedback = async (appId) => {
     }
 };
 
+export const getUserFeedback = async (userId) => {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            const response = await fetch(`${API_URL}:5000/userFeedback?id=${userId}`);
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch feedback by user (Attempt ${attempt})`);
+            }
+
+            const data = await response.json();
+            console.log('Fetched feedback by user:', data);
+            return data; // Success, return data
+        } catch (error) {
+            console.error(`Error fetching feedback by user (Attempt ${attempt}):`, error);
+
+            if (attempt === 3) {
+                return { error: 'Network error after 3 attempts' }; // Return error after 3rd attempt
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retrying
+        }
+    }
+};
+
 export const updateProcessingStatus = async (feedbackId, userId, status) => {
     try {
         const date = new Date().toISOString();

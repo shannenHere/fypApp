@@ -314,6 +314,45 @@ def get_feedback():
     finally:
         conn.close()
 
+# Get feedback by user id
+@app.route('/userFeedback', methods=['GET'])
+def get_user_feedback():
+    user_id = request.args.get('id')
+
+    if not user_id:
+        return jsonify({'error': 'Missing user id'}), 400
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+
+        # Fetch all feedback for the given user ID
+        cursor.execute('SELECT * FROM feedback WHERE user_id = ?', (user_id,))
+        results = cursor.fetchall()  # Fetch all feedback
+
+        if not results:
+            return jsonify({'user_feedback': []}), 200  # Return empty list if no feedback exists
+
+        # Convert results to JSON format
+        feedback_list = []
+        for row in results:
+            feedback_list.append({
+                'feedback_id': row[0],  
+                'user_id': row[1],  
+                'app_id': row[2],  
+                'reason': row[3],  
+                'status': row[4],  
+                'date': row[5],
+                'type': row[6]
+            })
+
+        return jsonify({'user_feedback': feedback_list}), 200
+
+    except sqlite3.Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
 # Update processing status
 @app.route('/updateStatus', methods=['POST'])
 def update_status():

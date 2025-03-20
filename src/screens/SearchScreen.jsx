@@ -156,7 +156,7 @@ const SearchScreen = () => {
             </View>
         </View>
 
-        {/* Scrollable List of Apps */}
+        {/* Non-Scrollable List of Apps */}
         <FlatList
             data={paginatedApps}
             keyExtractor={(item) => item.app_id.toString()}
