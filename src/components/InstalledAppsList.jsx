@@ -134,9 +134,9 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
 
   const filteredApps = installedAppsInDB.filter(
     (app) =>
-      app.app_name.toLowerCase().includes(filterText.toLowerCase()) &&
+      (app.app_name && app.app_name.toLowerCase().includes(filterText.toLowerCase())) &&
       (category === 'All' || (app.rating && app.rating.toLowerCase() === category.toLowerCase()))
-  );
+  );  
 
   console.log("Filtered Apps:", filteredApps.map(app => ({
     name: app.app_name,

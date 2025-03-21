@@ -427,18 +427,21 @@ def get_user_feedback():
     finally:
         conn.close()
 
-# Get feedback with Other - other types 
+# Get feedback with Other - other, pending review types 
 @app.route('/otherFeedback', methods=['GET'])
 def get_other_feedback():
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
 
-        # Fetch feedback where type is exactly 'Other - other Update'
+        # Fetch feedback with:
+        # 1. Type = 'Other - other Update' and Status not in ('Approved', 'Rejected')
+        # 2. Any type where Reason contains 'pending review' (case-insensitive)
         cursor.execute("""
             SELECT feedback_id, user_id, app_id, reason, status, date, type
             FROM feedback
-            WHERE type = 'Other - other Update'
+            WHERE (type = 'Other - other Update' AND status NOT IN ('Approved', 'Rejected'))
+               OR (LOWER(status) LIKE '%pending review%')
         """)
         feedback_list = cursor.fetchall()
 
@@ -461,21 +464,22 @@ def get_other_feedback():
                 "type": row[6],
             }
 
-            # Extract otherItemChange and otherReason using regex
-            match = re.match(r"Other - other: (.+?) - (.+)", row[3])
-            if match:
-                feedback_item["otherItemChange"] = match.group(1)  # First capture group
-                feedback_item["otherReason"] = match.group(2)  # Second capture group
+            # Extract otherItemChange and otherReason using regex (only for 'Other - other Update' type)
+            if row[6] == "Other - other Update":
+                match = re.match(r"Other - other: (.+?) - (.+)", row[3])
+                if match:
+                    feedback_item["otherItemChange"] = match.group(1)  # First capture group
+                    feedback_item["otherReason"] = match.group(2)  # Second capture group
 
-            # Fetch user email if user_id is not NULL
-            if row[1]:  # Ensure user_id exists
+            # Fetch user email if user_id exists
+            if row[1]:  
                 cursor.execute("SELECT email FROM users WHERE id = ?", (row[1],))
                 user_email_row = cursor.fetchone()
                 if user_email_row:
                     feedback_item["user_email"] = user_email_row[0]
 
-            # Fetch app name separately if app_id exists
-            if row[2]:  # Ensure app_id exists
+            # Fetch app name if app_id exists
+            if row[2]:  
                 cursor.execute("SELECT app_name FROM policies WHERE app_id = ?", (row[2],))
                 app_name_row = cursor.fetchone()
                 if app_name_row:

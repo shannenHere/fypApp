@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image } from 'react-native';
 import HeaderComponent from '../components/Header';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useAppList } from '../contexts/AppListContext';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserFeedback } from "../api/api"; 
-import { useNavigation } from '@react-navigation/native'; 
+import { useNavigation, useFocusEffect } from '@react-navigation/native'; 
 import { globalStyles } from '../styles/styles';
 
 const AccountScreen = () => {
@@ -36,6 +36,29 @@ const AccountScreen = () => {
 
     fetchFeedback();
   }, [user.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchFeedback = async () => {
+        try {
+          const result = await getUserFeedback(user.id);
+          console.log("Fetched feedback:", JSON.stringify(result, null, 2));
+  
+          if (Array.isArray(result.user_feedback)) {
+            const sortedFeedback = result.user_feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
+            setUserFeedback(sortedFeedback);
+          } else {
+            setUserFeedback([]);
+          }
+        } catch (err) {
+          console.error("Error fetching feedback:", err);
+          setUserFeedback([]);
+        }
+      };
+  
+      fetchFeedback();
+    }, [user.id])
+  );
 
   const handleCategoryPress = (category) => {
   // If the same category is clicked again, deselect it (set to default)
@@ -230,7 +253,7 @@ const AccountScreen = () => {
                 {/* App Name */}
                 <View style={styles.appReasonContainer}>
                   <Text style={styles.appItem}>
-                    {feedback.app_name}
+                    {feedback.app_name ? feedback.app_name: feedback.app_id}
                   </Text>
                   <Text style={styles.feedbackReason}>
                     {feedback.type === "comment" ? `<Comment>` : `<${feedback.reason}>`}

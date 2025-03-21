@@ -91,7 +91,7 @@ const fetchOtherFeedbacks = async () => {
                     <View key={index} style={styles.feedbackContainer}>
                         <View>
                             <View style={styles.nameEmailDateContainer}>
-                                <Text style={styles.appName}>{feedback.app_name}</Text>
+                                <Text style={styles.appName}>{feedback.app_name || feedback.app_id}</Text>
                                 {/* User Email & Date */}
                                 <View>
                                     <Text style={styles.feedbackUser}>{feedback.user_email || "Unknown User"}</Text>
@@ -99,11 +99,18 @@ const fetchOtherFeedbacks = async () => {
                                 </View>
                             </View>
 
-                            {/* Change & Reason (Only Show If Available) */}
-                            {/* Change & Reason (Only Show If Available) */}
-                            <Text style={styles.feedbackText}>{`Reason: ${feedback.otherReason || "None"}`}</Text>
-                            <Text style={styles.feedbackText}>{`Change: ${feedback.otherItemChange || "None"}`}</Text>
-
+                            {/* Display Other Reason & Item Change if available, otherwise show Reason & Status */}
+                            {feedback.otherReason && feedback.otherItemChange ? (
+                            <>
+                                <Text style={styles.feedbackText}>{`Reason: ${feedback.otherReason}`}</Text>
+                                <Text style={styles.feedbackText}>{`Change: ${feedback.otherItemChange}`}</Text>
+                            </>
+                            ) : (
+                            <>
+                                <Text style={styles.feedbackText}>{`${feedback.reason || "None"}`}</Text>
+                                <Text style={styles.feedbackText}>{`${feedback.status || "None"}`}</Text>
+                            </>
+                            )}
 
                             {/* Approve & Reject Buttons */}
                             <View style={styles.buttonContainer}>
@@ -194,7 +201,7 @@ const styles = StyleSheet.create({
     appName: {
         color: "black",
         fontWeight: "bold",
-        fontSize: 20,
+        fontSize: 14,
     },
     nameEmailDateContainer: {
         flexDirection: "row",
