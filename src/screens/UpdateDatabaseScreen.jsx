@@ -269,7 +269,7 @@ const UpdateDatabaseScreen = () => {
     
         } else {
             showAlert(`Other - ${otherPicker} Update`, "An admin will review your submission.", async () => {
-                await submitFeedback(app.app_id, user.id, `${otherItemChange} - ${otherReason}`, "Pending Review", `Other - ${otherPicker} Update`);
+                await submitFeedback(app.app_id, user.id, `Other - other: ${otherItemChange} - ${otherReason}`, "Pending Review", `Other - ${otherPicker} Update`);
             });
         }
     
@@ -428,7 +428,22 @@ const UpdateDatabaseScreen = () => {
                                 <View>
                                     <Text style={[styles.questionText, {fontSize: 15, marginTop: 0}]}>Other Updates</Text>
                                     <Text style={{color: "black", fontSize: 11}}>You will be notified after an admin had approve/rejected your update in your account section.</Text>
-                                    <TouchableOpacity style={[{borderWidth: 0.5, alignSelf: "flex-end", width: 120, height: 20, top: 5, alignItems: "center", flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 5}]}>
+                                    <TouchableOpacity 
+                                        style={[
+                                            { 
+                                                borderWidth: 0.5, 
+                                                alignSelf: "flex-end", 
+                                                width: 120, 
+                                                height: 20, 
+                                                top: 5, 
+                                                alignItems: "center", 
+                                                flexDirection: "row", 
+                                                justifyContent: "space-between", 
+                                                paddingHorizontal: 5
+                                            }
+                                        ]}
+                                        onPress={() => navigation.navigate("Main", { screen: "Account" })}
+                                    >
                                             <Text style={[{color: "black", fontSize: 11, padding: 2}]}>Go to Account</Text>
                                             <Icon name="angle-right" style={{color: "black"}}/>
                                     </TouchableOpacity>

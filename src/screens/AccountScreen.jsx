@@ -4,7 +4,7 @@ import HeaderComponent from '../components/Header';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useAppList } from '../contexts/AppListContext';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserFeedback, getAppDetails } from "../api/api"; 
+import { getUserFeedback } from "../api/api"; 
 import { useNavigation } from '@react-navigation/native'; 
 import { globalStyles } from '../styles/styles';
 
@@ -15,16 +15,14 @@ const AccountScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState('Not in DB');
   const [selectedCategoryFeedback, setSelectedCategoryFeedback] = useState('All');
   const [userFeedback, setUserFeedback] = useState([]);
-  const [appDetailsMap, setAppDetailsMap] = useState({});
 
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
         const result = await getUserFeedback(user.id);
-        console.log("Fetched feedback:", JSON.stringify(result, null, 2)); // Debugging
-  
+        console.log("Fetched feedback:", JSON.stringify(result, null, 2));
+
         if (Array.isArray(result.user_feedback)) {
-          // Sort feedback by date in descending order (latest first)
           const sortedFeedback = result.user_feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
           setUserFeedback(sortedFeedback);
         } else {
@@ -35,30 +33,9 @@ const AccountScreen = () => {
         setUserFeedback([]);
       }
     };
-  
-    console.log("Installed Apps Not In DB:", installedAppsNotInDB);
-    fetchFeedback();
-  }, [user.id]); // Runs when user.id changes
 
-  useEffect(() => {
-    if (userFeedback.length === 0) return; // Prevent running when feedback is empty
-  
-    const fetchAllAppDetails = async () => {
-      const uniqueAppIds = [...new Set(userFeedback.map(feedback => feedback.app_id))]; // Get unique app_ids
-      const appDetailsPromises = uniqueAppIds.map(app_id => getAppDetails(app_id)); // Fetch details for each app
-      const appDetailsResponses = await Promise.all(appDetailsPromises); // Await all API calls
-  
-      // Create a map { app_id: app_name }
-      const detailsMap = {};
-      appDetailsResponses.forEach((details, index) => {
-        detailsMap[uniqueAppIds[index]] = details.app_name;
-      });
-  
-      setAppDetailsMap(detailsMap);
-    };
-  
-    fetchAllAppDetails();
-  }, [userFeedback]); // Runs when `userFeedback` updates  
+    fetchFeedback();
+  }, [user.id]);
 
   const handleCategoryPress = (category) => {
   // If the same category is clicked again, deselect it (set to default)
@@ -195,7 +172,7 @@ const AccountScreen = () => {
           Feedbacks
           </Text>
           <Text style={styles.sectionDesc}>
-            You can keep count on your progress of your comments and submission of update database here.
+            Keep count on the progress of your feedbacks here.
           </Text>
           {/* Feedback Category Buttons */}
           <View style={styles.installAppsRow}>
@@ -253,7 +230,7 @@ const AccountScreen = () => {
                 {/* App Name */}
                 <View style={styles.appReasonContainer}>
                   <Text style={styles.appItem}>
-                    {appDetailsMap[feedback.app_id]}
+                    {feedback.app_name}
                   </Text>
                   <Text style={styles.feedbackReason}>
                     {feedback.type === "comment" ? `<Comment>` : `<${feedback.reason}>`}
@@ -354,6 +331,7 @@ const styles = StyleSheet.create({
   },
   installedAppsCategory: {
     flexDirection: 'row',
+    marginBottom: 1,
   },
   installedAppsButtons: {
     paddingVertical: 5,

@@ -326,17 +326,19 @@ def get_user_feedback():
     try:
         cursor = conn.cursor()
 
-        # Fetch all feedback for the given user ID
+        # Step 1: Fetch all feedback for the given user ID
         cursor.execute('SELECT * FROM feedback WHERE user_id = ?', (user_id,))
-        results = cursor.fetchall()  # Fetch all feedback
+        results = cursor.fetchall()
 
         if not results:
             return jsonify({'user_feedback': []}), 200  # Return empty list if no feedback exists
 
-        # Convert results to JSON format
+        # Step 2: Convert feedback results to JSON format
         feedback_list = []
+        unique_app_ids = set()  # Store unique app IDs to fetch only once
+
         for row in results:
-            feedback_list.append({
+            feedback = {
                 'feedback_id': row[0],  
                 'user_id': row[1],  
                 'app_id': row[2],  
@@ -344,12 +346,95 @@ def get_user_feedback():
                 'status': row[4],  
                 'date': row[5],
                 'type': row[6]
-            })
+            }
+            feedback_list.append(feedback)
+            unique_app_ids.add(row[2])  # Collect unique app IDs
+
+        # Step 3: Fetch app names in a second query (No JOIN)
+        app_details_map = {}
+        if unique_app_ids:
+            cursor.execute(f"SELECT app_id, app_name FROM policies WHERE app_id IN ({','.join(['?']*len(unique_app_ids))})", tuple(unique_app_ids))
+            app_results = cursor.fetchall()
+
+            # Create a dictionary { app_id: app_name }
+            app_details_map = {row[0]: row[1] for row in app_results}
+
+        # Step 4: Attach app names to feedback list
+        for feedback in feedback_list:
+            feedback["app_name"] = app_details_map.get(feedback["app_id"], "Unknown App")
 
         return jsonify({'user_feedback': feedback_list}), 200
 
     except sqlite3.Error as e:
         return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+# Get feedback with Other - other types 
+@app.route('/otherFeedback', methods=['GET'])
+def get_other_feedback():
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+
+        # Fetch feedback where type is exactly 'Other - other Update'
+        cursor.execute("""
+            SELECT feedback_id, user_id, app_id, reason, status, date, type
+            FROM feedback
+            WHERE type = 'Other - other Update'
+        """)
+        feedback_list = cursor.fetchall()
+
+        # Debugging: Print fetched raw data
+        print("Raw feedback from DB:", feedback_list)
+
+        feedback_data = []
+        for row in feedback_list:
+            feedback_item = {
+                "feedback_id": row[0],
+                "user_id": row[1],
+                "user_email": None,  # Placeholder for user email
+                "app_id": row[2],
+                "app_name": None,  # Placeholder for app name
+                "reason": row[3],
+                "otherItemChange": None,  # Extracted from reason
+                "otherReason": None,  # Extracted from reason
+                "status": row[4],
+                "date": row[5],
+                "type": row[6],
+            }
+
+            # Extract otherItemChange and otherReason using regex
+            match = re.match(r"Other - other: (.+?) - (.+)", row[3])
+            if match:
+                feedback_item["otherItemChange"] = match.group(1)  # First capture group
+                feedback_item["otherReason"] = match.group(2)  # Second capture group
+                
+            # Fetch user email if user_id is not NULL
+            if row[1]:  # Ensure user_id exists
+                cursor.execute("SELECT email FROM users WHERE id = ?", (row[1],))
+                user_email_row = cursor.fetchone()
+                if user_email_row:
+                    feedback_item["user_email"] = user_email_row[0]
+
+            # Fetch app name separately if app_id exists
+            if row[2]:  # Ensure app_id exists
+                cursor.execute("SELECT app_name FROM policies WHERE app_id = ?", (row[2],))
+                app_name_row = cursor.fetchone()
+                if app_name_row:
+                    feedback_item["app_name"] = app_name_row[0]
+
+            feedback_data.append(feedback_item)
+
+        # Debugging: Print final JSON response
+        print("Formatted feedback data:", feedback_data)
+
+        return jsonify(feedback_data)
+
+    except Exception as e:
+        print("Error fetching feedback:", e)
+        return jsonify({"error": "Server error"}), 500
+
     finally:
         conn.close()
 

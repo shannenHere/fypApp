@@ -19,12 +19,15 @@ import UpdateDatabaseScreen from "./src/screens/UpdateDatabaseScreen";
 import MorePrivacyScreen from "./src/screens/MorePrivacyScreen";
 import MorePermissionScreen from "./src/screens/MorePermissionScreen";
 import MoreFeedbacksScreen from "./src/screens/MoreFeedbacksScreen";
+import AdminReviewScreen from './src/screens/AdminReviewScreen';
+import UpdateNewAppScreen from './src/screens/UpdateNewAppScreen';
 
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { DrawerActions } from '@react-navigation/native';
 import { globalStyles } from './src/styles/styles';
+import { updateAppColumn } from './src/api/api';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -194,6 +197,8 @@ const App = () => {
                             <Stack.Screen name="MorePrivacyScreen" component={MorePrivacyScreen} />
                             <Stack.Screen name="MorePermissionScreen" component={MorePermissionScreen} />
                             <Stack.Screen name="MoreFeedbacksScreen" component={MoreFeedbacksScreen} />
+                            <Stack.Screen name="AdminReviewScreen" component={AdminReviewScreen}/>
+                            <Stack.Screen name="UpdateNewAppScreen" component={UpdateNewAppScreen}/>
                         </Stack.Navigator>
                     </NavigationContainer>
                 </RightDrawerProvider>
