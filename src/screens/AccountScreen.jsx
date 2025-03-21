@@ -97,11 +97,11 @@ const AccountScreen = () => {
       <View style={[globalStyles.container]}>
         <HeaderComponent title="Account" showBackButton={true} />
         {/* Icons for update database*/}
-        <View style={styles.iconRow}>
-                <TouchableOpacity onPress={() => navigation.navigate("AdminReviewScreen")}>
-                  <Icon name="comments" style={styles.databaseIcon} />
-                </TouchableOpacity>
-        </View>
+        {user.isAdmin && ( // Only show if user is admin
+          <TouchableOpacity onPress={() => navigation.navigate("AdminReviewScreen")}>
+            <Icon name="comments" style={styles.databaseIcon} />
+          </TouchableOpacity>
+        )}
         <View style={styles.container}>
         {/* Installed Apps Section */}
         <Text style={styles.sectionTitle}>Apps Installed on Your Device</Text>

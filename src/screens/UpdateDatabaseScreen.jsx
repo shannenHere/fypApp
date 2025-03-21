@@ -1,5 +1,11 @@
-import React, {useState} from 'react';
-import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert} from 'react-native';
+import React, {useState, useEffect, useRef} from 'react';
+import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert, 
+    KeyboardAvoidingView,
+    Platform,
+    Keyboard,
+    TouchableWithoutFeedback,
+    ScrollView,
+} from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
@@ -8,6 +14,7 @@ import { globalStyles } from '../styles/styles';
 import { useAuth } from "../contexts/AuthContext";
 
 const UpdateDatabaseScreen = () => {
+    const scrollViewRef = useRef(null);
     const route = useRoute();
     const { app } = route.params;  
     const { user } = useAuth();
@@ -27,6 +34,16 @@ const UpdateDatabaseScreen = () => {
 
     const [newIconUrl, setNewIconUrl] = useState("");
 
+    useEffect(() => { 
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+              scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+            });
+
+        return () => {
+            keyboardDidHideListener.remove();
+            };
+    }, []);
+    
     const showAlert = (title, message, onPressOK) => {
         Alert.alert(title, message, [
             { text: "Cancel" },
@@ -278,6 +295,17 @@ const UpdateDatabaseScreen = () => {
     };        
     
     return (
+        <KeyboardAvoidingView 
+              behavior={Platform.OS === "ios" ? "padding" : "height"} 
+              style={{ flex: 1 }}
+            >
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} accessible={false}>
+        <ScrollView 
+                ref={scrollViewRef} 
+                contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }} // Increase padding at the bottom
+                keyboardShouldPersistTaps="handled" // Allows tap interaction when keyboard is 
+                scrollEnabled={false}
+              >
         <View style={globalStyles.container}>
             <View style={styles.header}>
                 <TouchableOpacity
@@ -501,6 +529,9 @@ const UpdateDatabaseScreen = () => {
                 )}
             </View>
         </View>
+        </ScrollView>
+        </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
     );
 };
 

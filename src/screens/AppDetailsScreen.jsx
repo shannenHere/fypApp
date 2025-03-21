@@ -31,8 +31,6 @@ const AppDetailsScreen = () => {
   const [appDetails, setAppDetails] = useState(null);
   const [installedStatus, setInstalledStatus] = useState("Checking...");
 
-  const [forceRender, setForceRender] = useState(false);
-
   const [privacyLoading, setPrivacyLoading] = useState(false);
   const [permissionsLoading, setPermissionsLoading] = useState(false);
   const [feedbacksLoading, setFeedbacksLoading] = useState(false);
