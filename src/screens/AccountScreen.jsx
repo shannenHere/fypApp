@@ -154,7 +154,7 @@ const AccountScreen = () => {
                 ) : (
                   <TouchableOpacity
                     style={styles.updateButton}
-                    onPress={() => navigation.navigate("UpdateNewAppScreen", { app })}
+                    onPress={() => navigation.navigate("UpdateNewAppScreen", { app, user })}
                   >
                     <Text style={styles.updateButtonText}>Submit for Analysis</Text>
                   </TouchableOpacity>

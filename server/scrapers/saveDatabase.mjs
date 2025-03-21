@@ -1,6 +1,7 @@
 //5. Handle database insertion
 import sqlite3 from 'sqlite3';
-const dbPath = 'scrapers/privacy_policies.db';
+//const dbPath = 'privacy_policies.db';
+const dbPath = './scrapers/privacy_policies.db';;
 
 const db = new sqlite3.Database(dbPath);
 

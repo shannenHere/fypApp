@@ -4,7 +4,6 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 import { scrapePolicy, updateAppColumn, analyze, submitFeedback, updateProcessingStatus, getFeedback, addTerm } from '../api/api';
-import { useStatus } from '../contexts/UpdateStatusContext';
 import { globalStyles } from '../styles/styles';
 import { useAuth } from "../contexts/AuthContext";
 

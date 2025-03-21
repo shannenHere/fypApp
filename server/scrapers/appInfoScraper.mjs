@@ -4,9 +4,9 @@ import sqlite3 from 'sqlite3';
 import { getPrivacyPolicyText } from './privacyPolicyScraper.mjs';
 import { savePolicy, addToSensitiveApps, markForManualReview } from './saveDatabase.mjs';
 
-const dbPath = 'scrapers/privacy_policies.db';
+//const dbPath = 'privacy_policies.db';
+const dbPath = './scrapers/privacy_policies.db';
 const db = new sqlite3.Database(dbPath);
-
 
 // Check if app already exists in the database
 export function checkIfAppExists(appId) {
@@ -132,7 +132,7 @@ export async function fetchPrivacyPolicy(appId) {
         const appData = await getAppDetails(appId);
         if (!appData) {
             console.error(`No app details found for ${appId}. Marking for manual review`);
-            await markForManualReview(appId, "Unknown", null, "None", "No app details found");
+            await markForManualReview(appId, "No apps details found", null, "None", "No app details found");
             return;
         }
 
@@ -189,7 +189,8 @@ export async function fetchPrivacyPolicy(appId) {
 }
 
 // Run the function with an app ID from user input
-/*const appId = process.argv[2]; // Get App ID from command line argument
+/*
+const appId = process.argv[2]; // Get App ID from command line argument
 if (!appId) {
     console.log("Usage: node privacyScraper.js <app_id>");
     process.exit(1);

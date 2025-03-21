@@ -16,25 +16,56 @@ export const getAppIds = async () => {
     }
 };
 
-// Fetch details for a specific app by its app_id, retrying indefinitely on failure
+// Fetch details for a specific app by its app_id, retry once on failure
 export const getAppDetails = async (appId) => {
-    const fetchData = async () => {
-        try {
-            const response = await fetch(`${API_URL}:5000/app/${appId}`);
-            if (!response.ok) {
-                throw new Error('App not found');
-            }
-            const data = await response.json();
-            console.log('Fetched app details.');
-            return data;
-        } catch (error) {
-            console.log('Error fetching app details, retrying...');
-            return fetchData(); // Retry the fetch indefinitely
+    try {
+        const response = await fetch(`${API_URL}:5000/app/${appId}`);
+        if (!response.ok) {
+            console.log(`App ${appId} not found, retrying once...`);
+            const retryResponse = await fetch(`${API_URL}:5000/app/${appId}`);
+            if (!retryResponse.ok) throw new Error('App not found after retry');
+            return await retryResponse.json();
         }
-    };
-
-    return fetchData(); // Start the fetch process
+        return await response.json();
+    } catch (error) {
+        console.log('Error fetching app details:', error);
+        return null; // Return null if both attempts fail
+    }
 };
+
+// Check if app is in manual_review table with pending status
+export const isAppManualPending = async (appId) => {
+    try {
+        const response = await fetch(`${API_URL}:5000/appInManualPending?app_id=${appId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error during request:', error);
+        return { error: 'Network error' };
+    }
+};
+
+// Check if app in policies table, if no add in
+export const addApp = async (appId) => {
+    try {
+        const response = await fetch(`${API_URL}:5000/addApp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ app_id: appId }),
+        });
+
+        const data = await response.json();
+        console.log("Response:", data);
+        return data; // Return response to handle success/failure cases
+
+    } catch (error) {
+        console.error("Error adding app:", error);
+        return { error: "Network error" };
+    }
+}
 
 // Register User
 export const registerUser = async (email, password, isAdmin = 0) => {
@@ -306,23 +337,29 @@ export const scrapePolicy = async (url) => {
 
 // Scrape app data & privacy policies & save to database
 export const scrapeData = async (app_id) => {
+    if (!app_id) {
+        console.error("Missing app_id in scrapeData()");
+        return false;
+    }
+
+    console.log("App id in scrapeData api: ", app_id);
+
     try {
-        // Send GET request with the app_id as a query parameter
-        const response = await fetch(`${API_URL}:5001/scrape?app_id=${encodeURIComponent(app_id)}`, {
+        const response = await fetch(`${API_URL}:5001/scrape?appId=${app_id}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
 
-        // Handle the response
         if (response.ok) {
-            return { message: 'App data and privacy policy scraped successfully and saved to the database.' };
+            console.log(`Scraping successful for ${app_id}`);
+            return true;  // Return true if successful
         } else {
-            console.error('Error fetching app data:', response.status);
-            return { error: 'Failed to scrape data' };
+            console.error(`Error fetching app data: ${response.status}`);
+            return false;  // Return false if failed
         }
     } catch (error) {
-        console.error('Error during scraping app data:', error);
-        return { error: 'Network error' };
+        console.error('Network error during scraping app data:', error);
+        return false;
     }
 };
 

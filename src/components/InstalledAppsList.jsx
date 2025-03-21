@@ -43,6 +43,7 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
       console.log("Fetching installed apps from device...");
       const result = await InstalledApps.getApps();
       console.log(`Fetched ${result.length} apps from device`);
+      console.log(result);
       // Exclude your own app
       let appsList = Array.from(result).filter(app => app.packageName !== currentAppPackage);
       // Normalize TikTok entries

@@ -14,7 +14,8 @@ app.use(express.json());
 // API Endpoint to get app details from google-play-scraper, scrape privacy policies, and save data
 app.get('/scrape', async (req, res) => {
     const { appId } = req.query;
-
+    console.log(`📲 Received request to scrape App ID: ${appId}`);
+    
     if (!appId) {
         return res.status(400).json({ error: "App ID is required" });
     }
@@ -30,7 +31,7 @@ app.get('/scrape', async (req, res) => {
 
 // API Endpoint to get privacy policies from a URL
 app.get('/scrapePolicy', async (req, res) => {
-    const { url } = req.query;
+    let { url } = req.query;
 
     if (!url) {
         return res.status(400).json({ error: "A URL is required" });
@@ -39,7 +40,7 @@ app.get('/scrapePolicy', async (req, res) => {
     // Decode the encoded URL
     url = decodeURIComponent(url);
     console.log("Decoded URL:", url); // Debug log
-    
+
     try {
         const policyText = await getPrivacyPolicyText(url);
 

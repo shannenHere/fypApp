@@ -168,6 +168,60 @@ def analyze():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Check if app is in manual_review table with pending status
+@app.route('/appInManualPending', methods=['GET'])
+def is_app_in_manual_pending():
+    app_id = request.args.get('app_id')  # Get app_id from query parameters
+    
+    if not app_id:
+        return jsonify({"error": "Missing app_id parameter"}), 400
+
+    try:
+        conn = get_db_connection()  # Get database connection
+        cursor = conn.cursor()  # Create cursor
+
+        # Query to check if the app exists in manual_review table with "pending" status
+        cursor.execute("SELECT COUNT(*) FROM manual_review WHERE app_id = ? AND status = 'pending'", (app_id,))
+        result = cursor.fetchone()[0]  # Fetch the first column (count result)
+
+        conn.close()  # Close connection
+
+        return jsonify({"exists": result > 0})  # True if app exists with pending status
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Check if app exist in database, if no add the app_id
+@app.route('/addApp', methods=['POST'])
+def add_app():
+    try:
+        data = request.get_json()
+        app_id = data.get('app_id')
+
+        if not app_id:
+            return jsonify({"error": "Missing app_id"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Check if app already exists in policies table
+        cursor.execute("SELECT COUNT(*) FROM policies WHERE app_id = ?", (app_id,))
+        exists = cursor.fetchone()[0] > 0
+
+        if exists:
+            conn.close()
+            return jsonify({"message": "App already exists", "app_id": app_id}), 200
+
+        # Insert new app into the policies table
+        cursor.execute("INSERT INTO policies (app_id) VALUES (?)", (app_id,))
+        conn.commit()
+        conn.close()
+
+        return jsonify({"message": "App added successfully", "app_id": app_id}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Update specified column in database
 @app.route('/update', methods=['PUT'])
 def update():
@@ -219,28 +273,31 @@ def submit_feedback():
         return jsonify({'error': 'Missing required fields'}), 400
 
     conn = get_db_connection()
+    feedback_id = None  # Ensure it's defined even if insertion fails
     try:
-        # Insert feedback into the feedback table
+        # Check if the app_id exists in policies
+        cursor = conn.execute("SELECT COUNT(*) FROM policies WHERE app_id = ?", (app_id,))
+        if cursor.fetchone()[0] == 0:
+            # If app_id does not exist, insert a placeholder entry in policies
+            conn.execute("INSERT INTO policies (app_id, user_feedback) VALUES (?, ?)", (app_id, ""))
+            conn.commit()  # Commit to ensure the foreign key constraint doesn't fail later
+
+        # Insert feedback into feedback table
         cursor = conn.execute(
-            'INSERT INTO feedback (app_id, user_id, reason, status, date, type) VALUES (?, ?, ?, ?, ?, ?)',
-            (app_id, user_id, reason, status, date, feedback_type)
+            'INSERT INTO feedback (user_id, app_id, reason, status, date, type) VALUES (?, ?, ?, ?, ?, ?)',
+            (user_id, app_id, reason, status, date, feedback_type)
         )
         feedback_id = cursor.lastrowid
 
         # Update user_feedback in policies table
         cursor = conn.execute('SELECT user_feedback FROM policies WHERE app_id = ?', (app_id,))
         result = cursor.fetchone()
+        user_feedback_list = result[0].split(',') if result and result[0] else []
+        user_feedback_list.append(str(feedback_id))
 
-        user_feedback_list = []
-        if result and result[0]:
-            user_feedback = result[0]
-            user_feedback_list = user_feedback.split(',')
-        
-        user_feedback_list.append(str(feedback_id))  # Store feedback_id instead of user_id
-        updated_feedback = ','.join(user_feedback_list)
-
-        conn.execute('UPDATE policies SET user_feedback = ? WHERE app_id = ?', (updated_feedback, app_id))
+        conn.execute('UPDATE policies SET user_feedback = ? WHERE app_id = ?', (','.join(user_feedback_list), app_id))
         conn.commit()
+    
     except sqlite3.Error as e:
         conn.rollback()
         app.logger.error(f"Error inserting feedback: {str(e)}")
@@ -409,7 +466,7 @@ def get_other_feedback():
             if match:
                 feedback_item["otherItemChange"] = match.group(1)  # First capture group
                 feedback_item["otherReason"] = match.group(2)  # Second capture group
-                
+
             # Fetch user email if user_id is not NULL
             if row[1]:  # Ensure user_id exists
                 cursor.execute("SELECT email FROM users WHERE id = ?", (row[1],))
