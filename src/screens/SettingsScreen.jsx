@@ -5,9 +5,17 @@ import { globalStyles } from '../styles/styles';
 import { Picker } from "@react-native-picker/picker";
 import { useAuth } from '../contexts/AuthContext';
 import { useAppList } from "../contexts/AppListContext"; 
+import { useTheme } from "../contexts/ThemeContext";
 import { getAppIds, getAppDetails } from "../api/api"; 
 
 const SettingsScreen = () => {
+    const { theme, toggleTheme, themeColors } = useTheme(); // Use the theme and themeColors
+
+    const themeStyles = {
+        backgroundColor: themeColors.background, // Use background color from themeColors
+        color: themeColors.text, // Use text color from themeColors
+    };
+
     const { user } = useAuth();
     const { installedAppsInDB, setInstalledAppsInDB, installedAppsNotInDB, setInstalledAppsNotInDB } = useAppList();
     const [selectedAction, setSelectedAction] = useState("permission_category");
@@ -88,9 +96,9 @@ useEffect(() => {
         };
 
     return (
-        <View style={globalStyles.container}>
+        <View style={[globalStyles.container]}>
             <HeaderComponent title="Settings" showBackButton={true}/>
-            <View style={styles.container}>
+            <View style={[styles.container]}>
                 <Text style={styles.actionText}>Select an Action: </Text>
                 <View style={styles.pickerContainer}>
                     <Picker
@@ -323,7 +331,7 @@ useEffect(() => {
                         <View style={styles.selectedActionContainer}>
                             <View style={styles.filterTitleContainer}>
                                 <Text style={styles.filterTitle}>Change Theme</Text>
-                                <Text style={styles.totalText}>Current Theme: {filteredApps.length}</Text>
+                                <Text style={styles.totalText}>Current Theme: {selectedTheme}</Text>
                             </View>
                             <Text style={styles.actionText}>Select a Theme: </Text>
                             <View style={styles.pickerContainer}>
