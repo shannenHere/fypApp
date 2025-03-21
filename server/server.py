@@ -21,7 +21,7 @@ def get_db_connection():
 def get_apps():
     conn = get_db_connection()
     # Fetch all app details from the policies table
-    apps = conn.execute('SELECT app_id, app_name, rating, worst_permissions, privacy_concern FROM policies').fetchall()
+    apps = conn.execute('SELECT app_id, app_name, rating, permissions, category FROM policies').fetchall()
     # Fetch all icons from the app_icons table
     icons = conn.execute('SELECT app_id, icon_url FROM app_icons').fetchall()
     conn.close()
@@ -29,6 +29,18 @@ def get_apps():
     # Create a mapping from app_id to icon_url
     icon_map = {icon["app_id"]: icon["icon_url"] for icon in icons}
 
+    def extract_permission_types(permission_string):
+        """Extracts permission categories from raw permission text."""
+        if not permission_string:
+            return []
+        permissions = permission_string.split(";")  # Assuming permissions are separated by ";"
+        extracted_permissions = set()
+        for perm in permissions:
+            if "(" in perm and ")" in perm:
+                permission_type = perm.split("(")[-1].replace(")", "").strip()
+                extracted_permissions.add(permission_type)
+        return list(extracted_permissions)
+    
     # Convert rows to dict and merge icon data
     result = []
     for app in apps:
@@ -36,7 +48,9 @@ def get_apps():
             "app_id": app["app_id"],
             "app_name": app["app_name"],
             "icon_url": icon_map.get(app["app_id"]),  # Use the mapping to add the icon URL.
-            "rating": app["rating"]
+            "rating": app["rating"],
+            "permissions": extract_permission_types(app["permissions"]),
+            "category": app["category"]
         })
     return jsonify(result)
 
