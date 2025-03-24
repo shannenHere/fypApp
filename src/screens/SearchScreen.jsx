@@ -34,10 +34,13 @@ const SearchScreen = () => {
 
   // Filter apps based on the searchTerm and selected category
   const filteredApps = apps.filter((app) => {
+    if (!app.rating) return false; // Ignore apps without a rating
+
     const matchesName = app.app_name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = 
       selectedCategory === "All" || 
-      (app.rating && app.rating.toLowerCase() === selectedCategory.toLowerCase());
+      app.rating.toLowerCase() === selectedCategory.toLowerCase();
+    
     return matchesName && matchesCategory;
   });
 

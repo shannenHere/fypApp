@@ -129,6 +129,44 @@ export const forgotPassword = async (email, newPassword) => {
     }
   };
 
+// Change Password
+export const changePassword = async (email, newPassword) => {
+    try {
+        const response = await fetch(`${API_URL}:5000/change-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, newPassword })
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error changing password:', error);
+        return { error: 'Network error' };
+    }
+};
+
+// Delete User
+export const deleteUser = async (user_id) => {
+    try {
+        const response = await fetch(`${API_URL}:5000/deleteUser`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to delete user');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Error deleting user:', error.message);
+        return { error: error.message };
+    }
+};
+
 // Analyze policy & permissions & update in database
 export const analyze = async (app_id) => {
     try {

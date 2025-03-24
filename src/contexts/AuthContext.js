@@ -6,8 +6,8 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   //force logged in for testing
-  const [user, setUser] = useState({ id: 2, email: "abc@abc.com", isAdmin: false });
-  //const [user, setUser] = useState(null);
+  //const [user, setUser] = useState({ id: 3, email: "admin@admin.com", isAdmin: true });
+  const [user, setUser] = useState(null);
 
   // Sign up function using API
   const signUp = async (email, password) => {

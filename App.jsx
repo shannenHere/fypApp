@@ -5,7 +5,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { RightDrawerProvider, RightDrawerContext } from './src/contexts/RightDrawerContext';
 import { AuthProvider } from "./src/contexts/AuthContext";
 import { AppListProvider } from "./src/contexts/AppListContext"; 
-import { ThemeProvider } from "./src/contexts/ThemeContext"
 import HeaderComponent from './src/components/Header';
 
 import HomeScreen from './src/screens/HomeScreen';
@@ -185,27 +184,25 @@ const RightDrawerNavigator = ({ navigation }) => {
 
 const App = () => {
     return (
-        <ThemeProvider>
-            <AppListProvider>
-                <AuthProvider>
-                    <RightDrawerProvider>
-                        <NavigationContainer>
-                            <Stack.Navigator screenOptions={{ headerShown: false }}>
-                                <Stack.Screen name="RightDrawer" component={RightDrawerNavigator} />
-                                <Stack.Screen name="AppDetailsScreen" component={AppDetailsScreen} />
-                                <Stack.Screen name="UpdateDatabaseScreen" component={UpdateDatabaseScreen} />
-                                <Stack.Screen name="AccountScreen" component={AccountScreen} /> 
-                                <Stack.Screen name="MorePrivacyScreen" component={MorePrivacyScreen} />
-                                <Stack.Screen name="MorePermissionScreen" component={MorePermissionScreen} />
-                                <Stack.Screen name="MoreFeedbacksScreen" component={MoreFeedbacksScreen} />
-                                <Stack.Screen name="AdminReviewScreen" component={AdminReviewScreen}/>
-                                <Stack.Screen name="UpdateNewAppScreen" component={UpdateNewAppScreen}/>
-                            </Stack.Navigator>
-                        </NavigationContainer>
-                    </RightDrawerProvider>
-                </AuthProvider>
-            </AppListProvider>
-        </ThemeProvider>
+        <AppListProvider>
+            <AuthProvider>
+                <RightDrawerProvider>
+                    <NavigationContainer>
+                        <Stack.Navigator screenOptions={{ headerShown: false }}>
+                            <Stack.Screen name="RightDrawer" component={RightDrawerNavigator} />
+                            <Stack.Screen name="AppDetailsScreen" component={AppDetailsScreen} />
+                            <Stack.Screen name="UpdateDatabaseScreen" component={UpdateDatabaseScreen} />
+                            <Stack.Screen name="AccountScreen" component={AccountScreen} /> 
+                            <Stack.Screen name="MorePrivacyScreen" component={MorePrivacyScreen} />
+                            <Stack.Screen name="MorePermissionScreen" component={MorePermissionScreen} />
+                            <Stack.Screen name="MoreFeedbacksScreen" component={MoreFeedbacksScreen} />
+                            <Stack.Screen name="AdminReviewScreen" component={AdminReviewScreen}/>
+                            <Stack.Screen name="UpdateNewAppScreen" component={UpdateNewAppScreen}/>
+                        </Stack.Navigator>
+                    </NavigationContainer>
+                </RightDrawerProvider>
+            </AuthProvider>
+        </AppListProvider>
     );
 };
 

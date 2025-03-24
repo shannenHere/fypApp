@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { InstalledApps } from 'react-native-launcher-kit';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAppList } from '../contexts/AppListContext';
 import { globalStyles } from '../styles/styles';
 
@@ -36,7 +36,9 @@ const normalizeTikTok = (app) => {
 
 const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
   const { installedAppsInDB, setInstalledAppsInDB, installedAppsNotInDB, setInstalledAppsNotInDB } = useAppList();
+  const [isLoading, setIsLoading] = useState(true); // Loading state
   const navigation = useNavigation();
+
   // Fetch installed apps from device
   const fetchInstalledApps = async () => {
     try {
@@ -96,6 +98,7 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
         });
         console.log("Merged App:", matchingDb.app_name, "Rating:", matchingDb.rating); // Debug rating
       }
+      setIsLoading(false);
       return acc;
     }, []);
 
@@ -124,9 +127,11 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
     };
   }
 
-  useEffect(() => {
-    fetchAllData();
-  }, [filterText, category]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAllData();
+    }, []) // Empty dependency array ensures it runs on screen focus
+  );
 
   const handleAppClick = (app) => {
     navigation.navigate("AppDetailsScreen", { app });
@@ -146,7 +151,24 @@ const InstalledAppsList = ({ filterText = '',  category = 'All'}) => {
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={true} style={styles.scrollView}>
-        {filteredApps.length === 0 ? (
+      {isLoading ? (
+          <View>
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+            <View>
+                <Text style={styles.noAppsText}>
+                  Download some apps or explore more in the Search screen.
+                </Text>
+                <TouchableOpacity 
+                  style={[styles.searchButton, {width: 200}]} 
+                  onPress={() => navigation.navigate("Main", { screen: "Search" })}
+                >
+                  <Text style={[styles.searchButtonText]}>Go to Search</Text>
+                </TouchableOpacity>
+            </View>
+          </View>
+        ) : filteredApps.length === 0 ? (
           <View style={styles.noAppsContainer}>
             {category !== 'All' && (
               <Text style={styles.noAppsText}>

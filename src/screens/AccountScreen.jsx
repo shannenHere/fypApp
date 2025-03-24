@@ -21,7 +21,7 @@ const AccountScreen = () => {
       try {
         const result = await getUserFeedback(user.id);
         console.log("Fetched feedback:", JSON.stringify(result, null, 2));
-
+  
         if (Array.isArray(result.user_feedback)) {
           const sortedFeedback = result.user_feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
           setUserFeedback(sortedFeedback);
@@ -33,12 +33,18 @@ const AccountScreen = () => {
         setUserFeedback([]);
       }
     };
-
-    fetchFeedback();
-  }, [user.id]);
-
+  
+    if (user?.id) {
+      fetchFeedback();
+    }
+  }, [user?.id]);
+  
   useFocusEffect(
     useCallback(() => {
+      if (!user) {
+        return;
+      }
+  
       const fetchFeedback = async () => {
         try {
           const result = await getUserFeedback(user.id);
@@ -57,7 +63,7 @@ const AccountScreen = () => {
       };
   
       fetchFeedback();
-    }, [user.id])
+    }, [user?.id])
   );
 
   const handleCategoryPress = (category) => {
@@ -92,12 +98,37 @@ const AccountScreen = () => {
         ? feedback.type.toLowerCase() === 'comment' 
         : feedback.type.toLowerCase() !== 'comment'
     );  
-  
+
+  // Show login prompt if user is not logged in
+  if (!user) {
+    return (
+      <View style={[globalStyles.container]}>
+        <HeaderComponent title="Account" showBackButton={true} />
+        <View style={styles.container}>
+        <View style={styles.loginPrompt}>
+          <Text style={styles.loginPromptText}>
+            You need to log in to view feedback.
+          </Text>
+          <View style={styles.loginButtonContainer}>
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() => navigation.navigate("Login")}
+            >
+              <Text style={styles.loginButtonText}>Log In</Text>
+              <Icon name="angle-right" size={20} style={styles.loginIcon} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        </View>
+      </View>
+    );
+  }
+
   return (
       <View style={[globalStyles.container]}>
         <HeaderComponent title="Account" showBackButton={true} />
         {/* Icons for update database*/}
-        {user.isAdmin && ( // Only show if user is admin
+        {user?.isAdmin && ( // Only show if user is admin
           <TouchableOpacity onPress={() => navigation.navigate("AdminReviewScreen")}>
             <Icon name="comments" style={styles.databaseIcon} />
           </TouchableOpacity>
@@ -298,7 +329,9 @@ const styles = StyleSheet.create({
   databaseIcon: {
     fontSize: 30,
     color: "#333",
-    marginLeft: 20,
+    marginRight: 30,
+    alignSelf: "flex-end",
+    marginTop: -40,
   },
   container: {
     marginHorizontal: 20,
@@ -464,4 +497,49 @@ const styles = StyleSheet.create({
     fontSize: 9,  
     alignSelf: "flex-end",
   },
+  loginPrompt: { 
+    alignItems: 'center', 
+    width: "100%",
+    height: 300,
+    paddingTop: 85,
+    borderSize: 0.5,
+    borderWidth: 1,
+    borderColor: '#cccbca',
+    paddingHorizontal: 20,
+    marginTop: 30,
+},
+loginPromptText: { 
+    fontSize: 16, 
+    fontStyle: "italic",
+    color: 'grey',
+},
+loginButtonContainer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    paddingHorizontal: 15,
+},
+loginButton: { 
+    backgroundColor: '#007AFF', 
+    paddingHorizontal: 20, 
+    paddingVertical: 4,
+    borderRadius: 3, 
+    marginTop: 10 ,
+    width: 160,
+    flexDirection: 'row',
+    justifyContent: "space-between",
+    alignContent: "right",
+    height: 30,
+    borderWidth: 0.5,
+    
+},
+loginButtonText: { 
+    fontSize: 15,
+    color: 'white',
+},
+loginIcon: {
+    left: 5,
+    color: "white",
+    bottom: 1,
+}
 });

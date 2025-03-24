@@ -11,6 +11,7 @@ const API_URL = 'http://10.0.2.2:5000';
 
 const HomeScreen = () => {
     const { user } = useAuth();
+    console.log("User", user);
     const [searchText, setSearchText] = useState('');
     const [installedSearchText, setInstalledSearchText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -18,15 +19,17 @@ const HomeScreen = () => {
 
     useFocusEffect(
         useCallback(() => {
-          // Cleanup function: clear fields when screen loses focus.
-          return () => {
-            setSearchText("");
-          };
+            setSearchText("");  // Clear search input on screen focus
         }, [])
-    );
+    );    
 
     useEffect(() => {
-    }, []);     
+        if (user?.id) {
+            // Trigger refresh of installed apps list when user logs in
+            setInstalledSearchText(""); // Clear any previous searches
+            setSelectedCategory("All"); // Reset category selection
+        }
+    }, [user]);  
 
     const handleCategoryPress = (category) => {
     // If the same category is clicked again, deselect it (set to default)

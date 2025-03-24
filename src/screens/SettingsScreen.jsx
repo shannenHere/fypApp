@@ -1,22 +1,17 @@
-import React, {useState, useEffect} from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView} from 'react-native';
+import React, {useState, useEffect, useCallback} from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert} from 'react-native';
 import HeaderComponent from '../components/Header';
 import { globalStyles } from '../styles/styles';
 import { Picker } from "@react-native-picker/picker";
 import { useAuth } from '../contexts/AuthContext';
 import { useAppList } from "../contexts/AppListContext"; 
-import { useTheme } from "../contexts/ThemeContext";
-import { getAppIds, getAppDetails } from "../api/api"; 
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { getAppIds, submitFeedback, changePassword, deleteUser, logOut } from "../api/api"; 
 
 const SettingsScreen = () => {
-    const { theme, toggleTheme, themeColors } = useTheme(); // Use the theme and themeColors
-
-    const themeStyles = {
-        backgroundColor: themeColors.background, // Use background color from themeColors
-        color: themeColors.text, // Use text color from themeColors
-    };
-
-    const { user } = useAuth();
+    const { user, logOut } = useAuth();
+    const navigation = useNavigation();
     const { installedAppsInDB, setInstalledAppsInDB, installedAppsNotInDB, setInstalledAppsNotInDB } = useAppList();
     const [selectedAction, setSelectedAction] = useState("permission_category");
 
@@ -30,8 +25,14 @@ const SettingsScreen = () => {
     const [apps, setApps] = useState([]);
     const [filteredApps, setFilteredApps] = useState([]);
 
-    const [selectedTheme, setSelectedTheme] = useState("Light");
+    const [feedbackText, setFeedbackText] = useState("");
 
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [touched, setTouched] = useState(false);
+    const [error, setError] = useState({ password: "", confirmPassword: ""});
+
+    const [deleteEmail, setDeleteEmail] = useState("");
     useEffect(() => {
         const fetchApps = async () => {
           try {
@@ -47,26 +48,149 @@ const SettingsScreen = () => {
       }, []);
     
     // Filter apps when the selection changes
-useEffect(() => {
-    let filtered = [...apps];
+    useEffect(() => {
+        let filtered = [...apps];
+    
+        // Check if the user is logged in
+        if (user) {
+            // If logged in, filter installed apps based on permissions or category selection
+            if (selectedFilterCategory === "Permission") {
+                filtered = apps.filter(app => app.permissions?.includes(selectedPermissionType));
+                if (selectedPermissionFilterCategory === "Installed Apps") {
+                    filtered = filtered.filter(app =>
+                        installedAppsInDB.some(installed => installed.packageName === app.app_id)
+                    );
+                }
+            } else if (selectedFilterCategory === "Category") {
+                filtered = apps.filter(app => app.category === selectedCategoryType);
+                if (selectedCategoryFilterCategory === "Installed Apps") {
+                    filtered = filtered.filter(app =>
+                        installedAppsInDB.some(installed => installed.packageName === app.app_id)
+                    );
+                }
+            }
+        } else {
+            // If not logged in, show an alert or prompt to log in if the user clicks on "Installed Apps"
+            if (selectedPermissionFilterCategory === "Installed Apps" || selectedCategoryFilterCategory === "Installed Apps") {
+                // Show login prompt (or navigate to login screen)
+                Alert.alert(
+                    "Please log in",
+                    "You need to log in to view installed apps.",
+                    [
+                        { 
+                            text: "OK", 
+                            onPress: () => { 
+                                setSelectedPermissionFilterCategory("All");
+                                setSelectedCategoryFilterCategory("All");
+                            } 
+                        } 
+                    ]
+                );
+            }
+    
+            // Apply other filters based on category or permission
+            if (selectedFilterCategory === "Permission") {
+                filtered = apps.filter(app => app.permissions?.includes(selectedPermissionType));
+            } else if (selectedFilterCategory === "Category") {
+                filtered = apps.filter(app => app.category === selectedCategoryType);
+            }
+        }
+    
+        setFilteredApps(filtered);
+    }, [
+        user,
+        selectedFilterCategory, selectedPermissionType, selectedCategoryType, 
+        selectedPermissionFilterCategory, selectedCategoryFilterCategory, 
+        apps, installedAppsInDB
+    ]);    
 
-    if (selectedFilterCategory === "Permission") {
-        filtered = apps.filter(app => app.permissions?.includes(selectedPermissionType));
-        if (selectedPermissionFilterCategory === "Installed Apps") {
-            filtered = filtered.filter(app =>
-                installedAppsInDB.some(installed => installed.packageName === app.app_id)
+    // Use useFocusEffect to clear input fields when the screen loses focus.
+      useFocusEffect(
+        useCallback(() => {
+          // When screen is focused, do nothing.
+          return () => {
+            // When the screen is unfocused, reset the fields.
+            resetFields();
+          };
+        }, [])
+      );
+
+    const resetFields = () => {
+        setPassword("");
+        setConfirmPassword("");
+        setError({ password: "", confirmPassword: ""});
+        setTouched(false);
+    };
+
+    useEffect(() => {
+        if (touched) {
+          validateFields();
+        }
+      }, [password, confirmPassword]);
+
+    const validateFields = () => {
+    setError({
+        password: password
+        ? /[A-Z]/.test(password) && /\d/.test(password) && password.length >= 8
+            ? ""
+            : "Must be at least 8 chars, 1 uppercase, 1 number."
+        : "Password is required.",
+        confirmPassword: confirmPassword
+        ? confirmPassword === password
+            ? ""
+            : "Passwords do not match."
+        : "Please confirm your password.",
+    });
+    };
+
+    const handleChangePassword = async () => {
+        setTouched(true);
+        
+        // Perform validation and get fresh errors
+        const validationErrors = {
+          password: password
+            ? /[A-Z]/.test(password) && /\d/.test(password) && password.length >= 8
+              ? ""
+              : "Must be at least 8 chars, 1 uppercase, 1 number."
+            : "Password is required.",
+          confirmPassword: confirmPassword
+            ? confirmPassword === password
+              ? ""
+              : "Passwords do not match."
+            : "Please confirm your password.",
+        };
+      
+        setError(validationErrors);
+      
+        // Stop if any errors exist
+        if (Object.values(validationErrors).some((msg) => msg !== "")) {
+          return;
+        }
+      
+        const response = await changePassword(user.email, password);
+
+        if (response.success) {
+            Alert.alert(
+                "Success", "Your password has been updated.", 
+                [
+                    { 
+                        text: "OK", 
+                        onPress: () => { resetFields(); } 
+                      }                      
+                ],
+            );
+        } else {
+            Alert.alert(
+                "Error", "Failed to update password.", 
+                [
+                    { 
+                        text: "OK", 
+                        onPress: () => { resetFields(); } 
+                      }                      
+                ],
             );
         }
-    } else if (selectedFilterCategory === "Category") {
-        filtered = apps.filter(app => app.category === selectedCategoryType);
-        if (selectedCategoryFilterCategory === "Installed Apps") {
-            filtered = filtered.filter(app =>
-                installedAppsInDB.some(installed => installed.packageName === app.app_id)
-            );
-        }
-    }
-    setFilteredApps(filtered);
-}, [selectedFilterCategory, selectedPermissionType, selectedCategoryType, selectedPermissionFilterCategory, selectedCategoryFilterCategory, apps, installedAppsInDB]);    
+    };
 
     const handlePermissionCategoryPress = (filterCategory) => {
         // If the same category is clicked again, deselect it (set to default)
@@ -95,6 +219,105 @@ useEffect(() => {
         }
         };
 
+    const handleSubmitFeedback = async () => {
+      if (!feedbackText.trim()) {
+        Alert.alert("Error", "Feedback cannot be empty.");
+        return;
+      }
+    
+      try {
+        console.log("Submitting feedback with the following data:", {
+          app_id: "General",
+          user_id: user.id,
+          reason: feedbackText,
+          status: "Pending Review.",  // or any value you set for status
+          type: "General Feedback",  // or any value you set for type
+        });
+        
+        const response = await submitFeedback("General", user.id, feedbackText, "Pending Review", "General Feedback");
+    
+        if (response.error) {
+          console.error("Error submitting feedback:", response.error);
+          Alert.alert("Error", "Failed to submit feedback.");
+          return;
+        }
+    
+        Alert.alert(
+            "Success", "Feedback submitted successfully!", 
+            [
+                { 
+                    text: "OK", 
+                  }                      
+            ],
+        );
+        
+        // Clear input and refresh feedback list
+        setFeedbackText("");
+    
+      } catch (error) {
+        console.error("Error submitting feedback:", error);
+        Alert.alert(
+            "Error", "Something went wrong. Please try again.", 
+            [
+                { 
+                    text: "OK", 
+                  }                      
+            ],
+        );
+      }
+    };
+
+    const handleDelete = async () => {
+        if (deleteEmail === user.email) {
+            Alert.alert(
+                "Confirmation", 
+                "Do you want to delete your account? This is permanent.", 
+                [
+                    { 
+                        text: "Cancel", 
+                        style: "cancel",
+                    },     
+                    { 
+                        text: "Delete Account", 
+                        onPress: async () => {  
+                            await logOut();
+                            const result = await deleteUser(user.id);
+    
+                            if (!result.error) {  
+                                Alert.alert(
+                                    "Success", 
+                                    "Your account has been deleted permanently.", 
+                                    [
+                                        { 
+                                            text: "OK", 
+                                            onPress: () => navigation.goBack(),  
+                                        }                      
+                                    ]
+                                );
+                            } else {
+                                Alert.alert(
+                                    "Error", 
+                                    "Something went wrong. Please try again.", 
+                                    [
+                                        { 
+                                            text: "OK", 
+                                        }                      
+                                    ]
+                                );
+                            }
+                        }
+                    }                   
+                ]
+            );
+        } else {
+            Alert.alert(
+                "Email Incorrect", 
+                "Please enter the correct email and try again.", 
+                [{ text: "OK" }]
+            );
+        }
+    };    
+
     return (
         <View style={[globalStyles.container]}>
             <HeaderComponent title="Settings" showBackButton={true}/>
@@ -108,7 +331,6 @@ useEffect(() => {
                         itemStyle={styles.itemStyle}
                     >
                         <Picker.Item style={{fontSize:13, color: "black"}} label="Filter Apps by Permissions/Category"  value="permission_category"/>
-                        <Picker.Item style={{fontSize:13}} label="Change Theme" value="theme" />
                         <Picker.Item style={{fontSize:13}} label="Suggest Feedback" value="feedback" />
                         <Picker.Item style={{fontSize:13}} label="Change Password" value="password" />
                         <Picker.Item style={{fontSize:13}} label="Delete Account" value="delete" />
@@ -327,24 +549,164 @@ useEffect(() => {
                             </View>
                     )}
 
-                    {selectedAction === "theme" && (
+                    {selectedAction === "feedback" && (
                         <View style={styles.selectedActionContainer}>
-                            <View style={styles.filterTitleContainer}>
-                                <Text style={styles.filterTitle}>Change Theme</Text>
-                                <Text style={styles.totalText}>Current Theme: {selectedTheme}</Text>
-                            </View>
-                            <Text style={styles.actionText}>Select a Theme: </Text>
-                            <View style={styles.pickerContainer}>
-                                <Picker
-                                    selectedValue={selectedTheme}
-                                    onValueChange={(itemValue) => setSelectedTheme(itemValue)}
-                                    style={styles.picker}
-                                    itemStyle={styles.itemStyle}
-                                >
-                                    <Picker.Item style={{fontSize:13, color: "black"}} label="Light"  value="Light"/>
-                                    <Picker.Item style={{fontSize:13}} label="Dark" value="Dark" />
-                                </Picker>
-                            </View>
+                            {!user ? (
+                                // Show message if user is not logged in
+                                <View style={styles.loginPrompt}>
+                                    <Text style={styles.loginPromptText}>
+                                        You need to log in to submit feedback.
+                                    </Text>
+                                    <View style={styles.loginButtonContainer}>
+                                        <TouchableOpacity
+                                            style={styles.loginButton}
+                                            onPress={() => navigation.navigate("Login")}
+                                        >
+                                            <Text style={styles.loginButtonText}>Log In</Text>
+                                            <Icon name="angle-right" size={20} style={styles.loginIcon} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            ) : (
+                                <>
+                                    <Text style={styles.actionText}>
+                                        Submit your feedback for issues/improvements
+                                    </Text>
+                                    <View style={styles.textInputContainer}>
+                                        <TextInput
+                                            style={[
+                                                globalStyles.input,
+                                                { height: 100, textAlignVertical: "top", paddingTop: 10 },
+                                            ]}
+                                            placeholder="Enter feedback..."
+                                            value={feedbackText}
+                                            onChangeText={setFeedbackText}
+                                            multiline
+                                        />
+                                    </View>
+                                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmitFeedback}>
+                                        <Text style={styles.submitButtonText}>Submit</Text>
+                                    </TouchableOpacity>
+                                </>
+                            )}
+                        </View>
+                    )}
+
+                    {selectedAction === "password" && (
+                        <View style={styles.selectedActionContainer}>
+                            {!user ? (
+                                // Show message if user is not logged in
+                                <View style={styles.loginPrompt}>
+                                    <Text style={styles.loginPromptText}>
+                                        You need to log in to change password.
+                                    </Text>
+                                    <View style={styles.loginButtonContainer}>
+                                        <TouchableOpacity
+                                            style={styles.loginButton}
+                                            onPress={() => navigation.navigate("Login")}
+                                        >
+                                            <Text style={styles.loginButtonText}>Log In</Text>
+                                            <Icon name="angle-right" size={20} style={styles.loginIcon} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            ) : (
+                                <View>
+                                    <View style={styles.filterTitleContainer}>
+                                        <Text style={styles.filterTitle}>Change Password</Text>
+                                        <Text style={styles.totalText}>User: {user.email}</Text>
+                                    </View>
+                                    
+                                    <Text style={[styles.actionText, { marginTop: 10 }]}>
+                                        Enter new password:
+                                    </Text>
+                                    <Text style={styles.passwordText}>
+                                        *Min 8 chars, 1 uppercase, 1 number
+                                    </Text>
+
+                                    <TextInput
+                                        style={globalStyles.input}
+                                        secureTextEntry
+                                        value={password}
+                                        onChangeText={setPassword}
+                                        placeholder="Password"
+                                    />
+                                    <Text style={globalStyles.errorText}>{error.password}</Text>
+
+                                    <Text style={styles.actionText}>Re-enter new password:</Text>
+                                    <TextInput
+                                        style={globalStyles.input}
+                                        secureTextEntry
+                                        value={confirmPassword}
+                                        onChangeText={setConfirmPassword}
+                                        placeholder="Confirm Password"
+                                    />
+                                    <Text style={globalStyles.errorText}>{error.confirmPassword}</Text>
+
+                                    <TouchableOpacity style={styles.submitButton} onPress={handleChangePassword}>
+                                        <Text style={styles.submitButtonText}>Change Password</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </View>
+                    )}
+
+                    {selectedAction === "delete" && (
+                        <View style={styles.selectedActionContainer}>
+                            {!user ? (
+                                // Show message if user is not logged in
+                                <View style={styles.loginPrompt}>
+                                    <Text style={styles.loginPromptText}>
+                                        You need to log in to delete your account.
+                                    </Text>
+                                    <View style={styles.loginButtonContainer}>
+                                        <TouchableOpacity
+                                            style={styles.loginButton}
+                                            onPress={() => navigation.navigate("Login")}
+                                        >
+                                            <Text style={styles.loginButtonText}>Log In</Text>
+                                            <Icon name="angle-right" size={20} style={styles.loginIcon} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            ) : (
+                                <View>
+                                    <View style={styles.filterTitleContainer}>
+                                        <Text style={[styles.filterTitle, { marginTop: 10 }]}>
+                                            Delete Account
+                                        </Text>
+                                    </View>
+
+                                    <Text style={[styles.actionText, { marginTop: 10 }]}>
+                                        Are you sure you want to delete your account?
+                                    </Text>
+
+                                    <Text>
+                                        Your feedbacks won't be deleted. They will appear to be from{" "}
+                                        <Text style={{ fontStyle: "italic" }}>{"<deleted account>"}</Text>.
+                                    </Text>
+
+                                    <Text style={[styles.actionText, { marginTop: 10 }]}>
+                                        Enter your email to verify:
+                                    </Text>
+
+                                    <TextInput
+                                        style={globalStyles.input}
+                                        value={deleteEmail}
+                                        onChangeText={(text) => setDeleteEmail(text.trim().toLowerCase())}
+                                        placeholder="Email"
+                                        keyboardType="email-address"
+                                        autoCapitalize="none"
+                                    />
+
+                                    <TouchableOpacity
+                                        style={[styles.submitButton, styles.deleteButton]}
+                                        onPress={handleDelete}
+                                    >
+                                        <Text style={styles.submitButtonText}>Delete Account</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
                         </View>
                     )}
                 </View>
@@ -487,4 +849,70 @@ const styles = StyleSheet.create({
       appDetails: {
         fontSize: 10,
       },
+      textInputContainer: {
+        marginVertical: 10,
+      },
+      submitButton: {
+        backgroundColor: '#007AFF',
+        height: 30,
+        borderWidth: 0.5,
+        width: 120,
+        paddingHorizontal: 5,
+        paddingVertical: 5,
+        marginLeft: 5, 
+        alignItems: "center",
+        alignSelf: "flex-end",
+      },
+      submitButtonText: {
+        color: 'white',
+        fontSize: 13,
+        fontWeight: "bold",
+      },
+      passwordText: {
+        fontSize: 12,
+      },
+      loginPrompt: { 
+        alignItems: 'center', 
+        width: "100%",
+        height: 300,
+        paddingTop: 85,
+        borderSize: 0.5,
+        borderWidth: 1,
+        borderColor: '#cccbca',
+        paddingHorizontal: 20,
+    },
+    loginPromptText: { 
+        fontSize: 16, 
+        fontStyle: "italic",
+        color: 'grey',
+    },
+    loginButtonContainer: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        paddingHorizontal: 15,
+    },
+    loginButton: { 
+        backgroundColor: '#007AFF', 
+        paddingHorizontal: 20, 
+        paddingVertical: 4,
+        borderRadius: 3, 
+        marginTop: 10 ,
+        width: 160,
+        flexDirection: 'row',
+        justifyContent: "space-between",
+        alignContent: "right",
+        height: 30,
+        borderWidth: 0.5,
+        
+    },
+    loginButtonText: { 
+        fontSize: 15,
+        color: 'white',
+    },
+    loginIcon: {
+        left: 5,
+        color: "white",
+        bottom: 1,
+    }
 });

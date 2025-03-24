@@ -121,7 +121,7 @@ def login():
         return jsonify({'error': 'User not found'}), 404
 
     if bcrypt.checkpw(password.encode('utf-8'), user['password']):
-        return jsonify({'message': 'Login successful', 'is_admin': user['is_admin']})
+        return jsonify({'message': 'Login successful', 'user_id': user['id'], 'is_admin': user['is_admin']})
     else:
         return jsonify({'error': 'Invalid e-mail or password'}), 401
 
@@ -157,6 +157,56 @@ def forgot_password():
     # In a real application, send an email with the new password here.
     # For now, we'll just return success.
     return jsonify({'success': True, 'message': 'Password reset successful'})
+
+# Change Password
+@app.route('/change-password', methods=['POST'])
+def change_password():
+    data = request.json
+    email = data.get('email')
+    new_password = data.get('newPassword')
+
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+
+    if not user:
+        conn.close()
+        return jsonify({'error': 'User not found'}), 404
+
+    # Hash new password
+    hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+    conn.execute('UPDATE users SET password = ? WHERE email = ?', (hashed_password, email))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'success': True, 'message': 'Password changed successfully'})
+
+# Delete user and change email of the user to <deleted user>
+@app.route('/deleteUser', methods=['POST'])
+def delete_user():
+    data = request.json
+    user_id = data.get('user_id')
+
+    if not user_id:
+        return jsonify({'error': 'User ID is required'}), 400
+
+    conn = get_db_connection()
+    
+    try:
+        # Generate a unique deleted user email
+        deleted_email = f"<deleted user>_{user_id}"
+
+        # Update the user's email and nullify password
+        conn.execute(
+            'UPDATE users SET email = ?, password = NULL WHERE id = ?',
+            (deleted_email, user_id)
+        )
+
+        conn.commit()
+        return jsonify({'message': 'User deleted successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
 
 # Get result from Sentiment analysis of policies & permissions
 @app.route('/nlp', methods=['GET'])
