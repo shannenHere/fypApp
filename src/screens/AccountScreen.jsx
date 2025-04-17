@@ -18,6 +18,7 @@ const AccountScreen = () => {
 
   useEffect(() => {
     const fetchFeedback = async () => {
+      if (!user?.id) return; 
       try {
         const result = await getUserFeedback(user.id);
         console.log("Fetched feedback:", JSON.stringify(result, null, 2));
@@ -128,7 +129,7 @@ const AccountScreen = () => {
       <View style={[globalStyles.container]}>
         <HeaderComponent title="Account" showBackButton={true} />
         {/* Icons for update database*/}
-        {user?.isAdmin && ( // Only show if user is admin
+        {user?.isAdmin === 1 && ( // Only show if user is admin
           <TouchableOpacity onPress={() => navigation.navigate("AdminReviewScreen")}>
             <Icon name="comments" style={styles.databaseIcon} />
           </TouchableOpacity>
@@ -190,8 +191,9 @@ const AccountScreen = () => {
           <ScrollView style={styles.sectionContentScrollView} >
           {filteredApps.length > 0 ? (
           filteredApps.map((app) => {
-            const key = app.app_id || app.packageName; // Unique key
-            const name = app.app_name || app.label ; // Display name
+            if (!app) return null; // Skip if app is undefined or null
+            const key = app.app_id?.toString() || app.packageName?.toString(); // Unique key
+            const name = (app.app_name || app.label || "Unnamed App").toString() ; // Display name
             const isInDB = !!app.app_id; // If app_id exists, it's in DB
 
             return (

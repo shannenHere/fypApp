@@ -116,24 +116,46 @@ const CreateAccountScreen = () => {
       return;
     }
   
-    try {
-      const result = await signUp(email, password);
-      if (result.success) {
-        Alert.alert("Account Created", "Your account has been created successfully.", [
-          { text: "OK", onPress: () => navigation.navigate("Login")},
-        ]);
-      } else {
-        setError((prev) => ({ ...prev, signup: result.message || "This email is already in use. Try logging in instead." }));
+    const handleSignUp = async () => {
+      try {
+        const result = await signUp(email, password);
+        if (result.success) {
+          Alert.alert("Account Created", "Your account has been created successfully.", [
+            { text: "OK", onPress: () => navigation.navigate("Login") },
+          ]);
+        } else {
+          setError((prev) => ({
+            ...prev,
+            signup: result.message || "This email is already in use. Try logging in instead.",
+          }));
+        }
+      } catch (err) {
+        setError((prev) => ({
+          ...prev,
+          signup: err.message.includes("Network")
+            ? "Network error. Please check your connection and try again."
+            : "An unexpected error occurred. Please try again.",
+        }));
       }
-    } catch (err) {
-      setError((prev) => ({
-        ...prev,
-        signup: err.message.includes("Network")
-          ? "Network error. Please check your connection and try again."
-          : "An unexpected error occurred. Please try again.",
-      }));
-    }
-  };
+    };
+    
+    // Show confirmation alert before signing up
+  Alert.alert(
+    "Privacy Notice",
+    "By creating an account, you consent to the app accessing your installed apps. However, analysis is only performed on the apps you choose to submit.",
+    [
+      {
+        text: "Cancel",
+        onPress: () => resetFields(),
+        style: "cancel",
+      },
+      {
+        text: "Proceed",
+        onPress: handleSignUp,
+      },
+    ]
+  );
+};
 
   return (
     <View style={globalStyles.container}>

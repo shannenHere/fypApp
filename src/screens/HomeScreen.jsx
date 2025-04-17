@@ -7,8 +7,6 @@ import InstalledAppsList from '../components/InstalledAppsList';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native'; 
 
-const API_URL = 'http://10.0.2.2:5000';
-
 const HomeScreen = () => {
     const { user } = useAuth();
     console.log("User", user);

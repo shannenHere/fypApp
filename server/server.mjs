@@ -14,7 +14,7 @@ app.use(express.json());
 // API Endpoint to get app details from google-play-scraper, scrape privacy policies, and save data
 app.get('/scrape', async (req, res) => {
     const { appId } = req.query;
-    console.log(`📲 Received request to scrape App ID: ${appId}`);
+    console.log(`Received request to scrape App ID: ${appId}`);
     
     if (!appId) {
         return res.status(400).json({ error: "App ID is required" });
