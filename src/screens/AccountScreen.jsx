@@ -108,7 +108,7 @@ const AccountScreen = () => {
         <View style={styles.container}>
         <View style={styles.loginPrompt}>
           <Text style={styles.loginPromptText}>
-            You need to log in to view feedback.
+            You need to log in to view Account.
           </Text>
           <View style={styles.loginButtonContainer}>
             <TouchableOpacity
