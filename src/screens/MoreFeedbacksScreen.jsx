@@ -107,11 +107,13 @@ const MoreFeedbacksScreen = () => {
             )}
             {/* Icons for update database*/}
             <View style={styles.iconRow}>
+            {user?.id && (
                     <TouchableOpacity onPress={() => navigation.navigate("UpdateDatabaseScreen", {
                       app: appDetails
                     })}>
                       <Icon name="database" style={styles.databaseIcon} />
                     </TouchableOpacity>
+                  )}
             </View>
       
             {/* Top Section: Icon, Name, Rating, Installed Status */}
@@ -148,6 +150,7 @@ const MoreFeedbacksScreen = () => {
                 </View>
             </View>
             <View style={styles.section}>
+            {user?.id && (
                 <View style={styles.feedbackInputContainer}>
                   {/* Current User Section */}
                   <View style={styles.userInfoRow}>
@@ -171,6 +174,7 @@ const MoreFeedbacksScreen = () => {
                     </TouchableOpacity>
                   </View>
                 </View>
+            )}
                 {/* Feedback Section */}
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Feedback</Text>
@@ -295,6 +299,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     marginRight: 30,
     top: 15,
+    height: 20,
   },
   databaseIcon: {
     fontSize: 25,

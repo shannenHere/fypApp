@@ -217,11 +217,14 @@ const handleSubmitFeedback = async () => {
       )}
       {/* Icons for update database*/}
       <View style={styles.iconRow}>
-              <TouchableOpacity onPress={() => navigation.navigate("UpdateDatabaseScreen", {
-                app: appDetails
-              })}>
-                <Icon name="database" style={styles.databaseIcon} />
-              </TouchableOpacity>
+              {user?.id && (
+                <TouchableOpacity onPress={() => navigation.navigate("UpdateDatabaseScreen", {
+                  app: appDetails
+                })}>
+                  <Icon name="database" style={styles.databaseIcon} />
+                
+                </TouchableOpacity>
+                )}
               <TouchableOpacity onPress={() => navigation.navigate("MoreFeedbacksScreen", { installedStatus, appDetails })}>
                 <Icon name="commenting-o" style={styles.feedbackIcon} />
               </TouchableOpacity>
@@ -392,29 +395,31 @@ const handleSubmitFeedback = async () => {
               ))
            )}
           </ScrollView>
+          {user?.id && (
           <View style={styles.feedbackInputContainer}>
-          {/* Current User Section */}
-          <View style={styles.userInfoRow}>
-            <View style={styles.iconContainer}>
-              {/* Replace with your icon */}
-              <Icon name="user-circle" size={30}/>
+            {/* Current User Section */}
+            <View style={styles.userInfoRow}>
+              <View style={styles.iconContainer}>
+                {/* Replace with your icon */}
+                <Icon name="user-circle" size={30}/>
+              </View>
+              <Text style={styles.email}>{user?.email}</Text>
             </View>
-            <Text style={styles.email}>{user?.email}</Text>
-          </View>
 
-          {/* Update Feecback Section */}
-          <View style={styles.updateFeedbackRow}>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter comment..."
-              value={feedbackText}
-              onChangeText={(text) => setFeedbackText(text)}
-            />
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmitFeedback}>
-              <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
-          </View>
+            {/* Update Feecback Section */}
+            <View style={styles.updateFeedbackRow}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter comment..."
+                value={feedbackText}
+                onChangeText={(text) => setFeedbackText(text)}
+              />
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmitFeedback}>
+                <Text style={styles.submitButtonText}>Submit</Text>
+              </TouchableOpacity>
+            </View>
         </View>
+        )}
           </View>
         </View>
       </View>

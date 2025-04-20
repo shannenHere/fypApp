@@ -161,7 +161,7 @@ const CreateAccountScreen = () => {
     <View style={globalStyles.container}>
       <HeaderComponent title="Create Account" showBackButton={true} />
 
-      <Text style={globalStyles.errorText}>{error.signup}</Text>
+      <Text style={[globalStyles.errorText, styles.emailExists]}>{error.signup}</Text>
 
       <View style={globalStyles.InputContainer}>
         <View style={globalStyles.InputFields}>
@@ -258,6 +258,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 18,
   },
+  emailExists: {
+    marginLeft: 55,
+    marginTop: 40,
+    marginBottom: -40,
+    fontSize: 20,
+  }
 });
 
 export default CreateAccountScreen;
