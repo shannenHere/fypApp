@@ -11,40 +11,60 @@
 <code>npm install</code></br>
 <code>npx react-native run-android</code></br>
 </br>
-<p>Run server:</p></br>
+<p>Run server:</p>
 <code>python server.py</code></br>
 <code>node server.mjs</code></br>
 </br>
+
 <hr>
 <p>Full functionalities by RBAC: </p>
-<pre>
-1.	Account Management
-•	Create account
-•	Log in / Log out
-•	Forgot password
-•	Change password
-•	Delete account (feedback remains as from <deleted user>)
+<ol>
+  <li>Account Management
+    <ul>
+      <li>Create account</li>
+      <li>Log in / Log out</li>
+      <li>Forgot password</li>
+      <li>Change password</li>
+      <li>Delete account (feedback remains as from <deleted user>)</li>
+    </ul>
+  </li>
+  <li>All Users (No Login Required)
+    <ul>
+      <li>Search for any app in the database </li>
+      <li>View app details including:
+        <ul>
+          <li>Privacy policy score</li>
+          <li>Permission score</li>
+          <li>User rating</li>
+        </ul>
+      </li>
+      <li>Filter apps by:</li>
+        <ul>
+          <li>Rating</li>
+          <li>Permission type</li>
+          <li>App category</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Registered Users  
+    <ul>
+      <li>Categorize installed apps by privacy rating</li>
+      <li>View installation status in app details</li>
+      <li>Leave feedback and suggestions on app scores
+        <ul>
+          <li>Feeback can be in update database of comments</li>
+          <li>Feedback can be by app or general</li>
+        </ul>
+      </li>
+      <li>Submit updates (e.g., new privacy policy URLs, full text for re-analysis)</li>
+      <li>Add new apps to the database for analysis</li>
+    </ul>
+  </li>
+  <li>For Admin
+    <ul>
+      <li>Review, approve, or reject user-submitted feedback and suggestions</li>
+    </ul>
+  </li>
+</ol>
 
-2.	All Users (No Login Required)
-•	Search for any app in the database
-•	View app details including:
-•	Privacy policy score
-•	Permission score
-•	User rating
-•	Filter apps by:
-•	Rating
-•	Permission type
-•	App category
-
-3.	Registered Users
-•	Categorize installed apps by privacy rating
-•	View installation status in app details
-•	Leave feedback and suggestions on app scores
-•	Feedback can be in update database or comments
-•	Feedback can be by app or general
-•	Submit updates (e.g., new privacy policy URLs, full text for re-analysis)
-•	Add new apps to the database for analysis
-
-4.	For Admin
-•	Review, approve, or reject user-submitted feedback and suggestions
-</pre>
