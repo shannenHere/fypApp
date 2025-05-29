@@ -3,7 +3,8 @@
 <p>Developed as part of final year project, providing alternative to reading T&Cs.</p>
 <p>Integrates `google-play-scraper`, `Puppeteer` & `StanfordNLP` for automatic scraping and analysis.</p>
 
-</br></br>
+</br>
+</hr>
 
 <p>To run locally:</p>
 <code>git clone https://github.com/shannenHere/fypApp.git</code></br>
