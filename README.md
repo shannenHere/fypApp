@@ -1,21 +1,21 @@
 <h1>PRIVACY RATING APP</h1>
 <h3>"An App to assess Privacy of other Apps."</h3>
-Developed as part of final year project, providing alternative to reading T&Cs.
-Integrates `google-play-scraper`, `Puppeteer` & `StanfordNLP` for automatic scraping and analysis.
+<p>Developed as part of final year project, providing alternative to reading T&Cs.</p>
+<p>Integrates `google-play-scraper`, `Puppeteer` & `StanfordNLP` for automatic scraping and analysis.</p>
 
 
-To run locally:
-git clone https://github.com/shannenHere/fypApp.git
-cd fypApp
-npm install
-npx react-native run-android
+<p>To run locally:</p>
+<code>git clone https://github.com/shannenHere/fypApp.git</code>
+<code>cd fypApp</code>
+<code>npm install</code>
+<code>npx react-native run-android</code>
 
-Run server:
-python server.py
-node server.mjs
+<p>Run server:</p>
+<code>python server.py</code>
+<code>node server.mjs</code>
 
 
-Full functionalities by RBAC: 
+<pre>Full functionalities by RBAC: 
 1.	Account Management
 •	Create account
 •	Log in / Log out
@@ -45,4 +45,4 @@ Full functionalities by RBAC:
 
 4.	For Admin
 •	Review, approve, or reject user-submitted feedback and suggestions
-
+</pre>
