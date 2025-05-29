@@ -3,19 +3,21 @@
 <p>Developed as part of final year project, providing alternative to reading T&Cs.</p>
 <p>Integrates `google-play-scraper`, `Puppeteer` & `StanfordNLP` for automatic scraping and analysis.</p>
 
+</br></br>
 
 <p>To run locally:</p>
-<code>git clone https://github.com/shannenHere/fypApp.git</code>
-<code>cd fypApp</code>
-<code>npm install</code>
-<code>npx react-native run-android</code>
-
-<p>Run server:</p>
-<code>python server.py</code>
-<code>node server.mjs</code>
-
-
-<pre>Full functionalities by RBAC: 
+<code>git clone https://github.com/shannenHere/fypApp.git</code></br>
+<code>cd fypApp</code></br>
+<code>npm install</code></br>
+<code>npx react-native run-android</code></br>
+</br>
+<p>Run server:</p></br>
+<code>python server.py</code></br>
+<code>node server.mjs</code></br>
+</br>
+<hr>
+<p>Full functionalities by RBAC: </p>
+<pre>
 1.	Account Management
 •	Create account
 •	Log in / Log out
