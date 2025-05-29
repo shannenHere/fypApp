@@ -4,7 +4,7 @@
 <p>Integrates `google-play-scraper`, `Puppeteer` & `StanfordNLP` for automatic scraping and analysis.</p>
 
 </br>
-</hr>
+<hr>
 
 <p>To run locally:</p>
 <code>git clone https://github.com/shannenHere/fypApp.git</code></br>
