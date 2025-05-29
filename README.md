@@ -1,5 +1,5 @@
 <h1>PRIVACY RATING APP</h1>
-<h3>"An App to assess Privacy of other Apps."</h3>"
+<h3>"An App to assess Privacy of other Apps."</h3>
 Developed as part of final year project, providing alternative to reading T&Cs.
 Integrates `google-play-scraper`, `Puppeteer` & `StanfordNLP` for automatic scraping and analysis.
 
