@@ -13,7 +13,7 @@
 <code>npx react-native run-android</code></br>
 </br>
 <p>Run server:</p>
-<code>cd server</code>
+<code>cd server</code></br>
 <code>python server.py</code></br>
 <code>node server.mjs</code></br>
 </br>
